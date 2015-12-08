@@ -7,7 +7,9 @@
 *
 */
 
-namespace posey\ultimateblog\controller;
+namespace posey\ultimateblog\event;
+
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
 * Event Listener
@@ -51,24 +53,26 @@ class listener implements EventSubscriberInterface
 	
 	static public function getSubscribedEvents()
 	{
-		'core.user_setup'		=> 'set_blog_language',
-		'core.page_header'		=> 'add_page_header_link',
+		return [
+			'core.user_setup'		=> 'set_blog_lang',
+			'core.page_header'		=> 'add_page_header_link',
+		];
 	}
 	
-	public function set_blog_language($event)
+	public function set_blog_lang($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];
-		$lang_set_ext[] = array(
+		$lang_set_ext[] = [
 			'ext_name' => 'posey/ultimateblog',
 			'lang_set' => 'common',
-		);
+		];
 		$event['lang_set_ext'] = $lang_set_ext;
 	}
 
 	public function add_page_header_link($event)
 	{
 		$this->template->assign_vars(array(
-			'U_UB_BLOG'		=> $this->helper->route('posey_demo_blog'),
+			'U_UB_BLOG'		=> $this->helper->route('posey_ultimateblog_blog'),
 		));
 	}
 }

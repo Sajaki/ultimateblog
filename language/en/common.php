@@ -38,4 +38,5 @@ if (empty($lang) || !is_array($lang))
 // Merge the following language entries into the lang array
 $lang = array_merge($lang, array(
 	'BLOG'		=> 'Blog',
+	'UB_BLOG'	=> 'Blog',
 ));
