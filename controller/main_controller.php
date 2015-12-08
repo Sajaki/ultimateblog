@@ -75,7 +75,7 @@ class main_controller
 			break;
 			
 			case 'edit':
-				$this-> ($blog_id);
+				$this->edit_blog($blog_id);
 				// Generate the page template
 //EDIT CHANGE				return $this->helper->render('blogs_latest.html', $this->user->lang('UB_BLOGS'));
 			break;
