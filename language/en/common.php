@@ -37,8 +37,25 @@ if (empty($lang) || !is_array($lang))
 //
 // Merge the following language entries into the lang array
 $lang = array_merge($lang, array(
-	'BLOG'					=> 'Blog',
-	'CHOOSE_CATEGORY'		=> 'Choose Category',
-	'UB_BLOG'				=> 'Blog',
-	'UB_BLOG_ADD'			=> 'Add Blog',
+	'BLOG'				=> 'Blog',
+	'BLOG_ADD'			=> 'Add blog',
+	'BLOG_ADDED'		=> 'Your blog has been succesfully added',
+	'BLOG_AUTHOR'		=> 'Author',
+	'BLOG_CATS'			=> 'Blog Categories',
+	'BLOG_CHOOSE_CAT'	=> 'Choose a category..',
+	'BLOG_FOR_CAT'		=> 'Blogs for category',
+	'BLOG_IN'			=> 'in', // example: Someone posted “in” My Awesome Category “on” Dec 12th, 2015
+	'BLOG_ON'			=> 'on', // See example above
+	'BLOG_NEW'			=> 'New blog entry',
+	'BLOG_POSTED_BY'	=> 'Posted by',
+	'BLOG_POSTED_ON'	=> 'Posted on',
+	'BLOG_POSTS'		=> 'Blog Posts',
+	'BLOG_READ_FULL'	=> 'Read the full blog',
+	'BLOG_VIEW'			=> 'View your blog',
+	
+	'CAT_NO_BLOGS'		=> 'This category does not have any blogs yet',
+	'CATEGORY'			=> 'Category',
+	'CATEGORIES'		=> 'Categories',
+	
+	'LOG_BLOG_ADDED'	=> 'New blog entry: %1$s',
 ));

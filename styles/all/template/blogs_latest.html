@@ -1,11 +1,11 @@
 <!-- INCLUDE overall_header.html -->
-<a href="{U_UB_BLOG_ADD}" class="button icon-button post-icon blog-add" title="Post a new blog">Add Blog</a>
-<h1 class="blog-name">Blog</h1>
+<a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a>
+<h1 class="blog-name">{L_BLOG}</h1>
 
 <div class="panel blog-panel">
 	<div class="inner">
 		<div class="panel bg2 blog-categories">
-			<h3>Categories</h3>
+			<h3>{L_CATEGORIES}</h3>
 			<!-- BEGIN cats -->
 				<a href="{cats.LINK}" alt="" title="{cats.NAME}">{cats.NAME}</a>
 				<!-- IF not cats.S_LAST_ROW --><br><hr><!-- ENDIF -->
@@ -15,7 +15,7 @@
 			<div class="blog<!-- IF not blogs.S_LAST_ROW --> blog-border<!-- ENDIF -->">
 				<!-- IF not blogs.S_FIRST_ROW --><br><!-- ENDIF -->
 				<h2 class="blog-subject"><a href="{blogs.U_BLOG}" alt="" title="{L_BLOG_READ_FULL}">{blogs.SUBJECT}</a></h2>
-				<span class="blog-posted">Posted by {blogs.POSTER} in <a href="{blogs.U_CAT}" title="{blogs.CAT}" alt="">{blogs.CAT}</a> on {blogs.POST_TIME}</span>
+				<span class="blog-posted">{L_BLOG_POSTED_BY} {blogs.POSTER} {L_BLOG_IN} <a href="{blogs.U_CAT}" title="{blogs.CAT}" alt="">{blogs.CAT}</a> {L_BLOG_ON} {blogs.POST_TIME}</span>
 				<br><br>
 				<div class="blog-text">
 					{blogs.TEXT}

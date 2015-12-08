@@ -68,23 +68,23 @@ class main_controller
 		
 		switch($action)
 		{
-			case 'add':
-				$this->add_blog();
-				// Generate the page template
-				return $this->helper->render('blog_add.html', $this->user->lang('UB_BLOG_ADD'));
-			break;
-			
-			case 'edit':
-				$this->edit_blog($blog_id);
-				// Generate the page template
-//EDIT CHANGE				return $this->helper->render('blogs_latest.html', $this->user->lang('UB_BLOGS'));
-			break;
-			
-			default:
-				$this->latest_blogs();
-				// Generate the page template
-				return $this->helper->render('blogs_latest.html', $this->user->lang('UB_BLOGS'));
-			break;
+ 			case 'add':
+ 				$this->add_blog();		 				$this->add_blog();
++				// Generate the page template
++				return $this->helper->render('blog_add.html', $this->user->lang('BLOG_ADD'));
+ 			break;		 			break;
+-					+
+ 			case 'edit':		 			case 'edit':
+-				$this->edit_blog($blog_id);		+				$this-> ($blog_id);
++				// Generate the page template
++//EDIT CHANGE				return $this->helper->render('blogs_latest.html', $this->user->lang('UB_BLOGS'));
+ 			break;		 			break;
+-					+
+ 			default:		 			default:
+ 				$this->latest_blogs();		 				$this->latest_blogs();
++				// Generate the page template
++				return $this->helper->render('blogs_latest.html', $this->user->lang('BLOG'));
+ 			break;		 			break;
 		}
 	}
 	
@@ -132,7 +132,7 @@ class main_controller
 			// Cut off blog text
 			if ($this->config['ub_cutoff'] != 0)
 			{
-				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... ' . $this->user->lang['BLOG_READ_FULL'] : $text;
+				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... <a href="' . $this->helper->render('posey_ultimateblog_blog', array('blog_id' => (int) $row['blog_id'])) . ' alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '"><em>' . $this->user->lang['BLOG_READ_FULL'] . '</em></a>' : $text;
 			}
 
 			$this->template->assign_block_vars('blogs', array(
@@ -169,15 +169,14 @@ class main_controller
 			/* ... STILL TO COME ... */
 		
 		$this->template->assign_vars(array(
-			'U_UB_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', array('action' => 'add')),
+			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', array('action' => 'add')),
 		));
 		
 		// Assign breadcrumb template vars
 		$this->template->assign_block_vars('navlinks', array(
 			'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog'),
-			'FORUM_NAME'		=> $this->user->lang('UB_BLOG'),
+			'FORUM_NAME'		=> $this->user->lang('BLOG'),
 		));
-		
 	}
 	
 	public function add_blog()
@@ -186,7 +185,7 @@ class main_controller
 				FROM ' . $this->ub_cats_table;
 		$result = $this->db->sql_query($sql);
 		
-		$categories = '<option selected="selected" disabled="disabled" >' . $this->user->lang['CHOOSE_CATEGORY'] . '</option>';
+		$categories = '<option selected="selected" disabled="disabled" >' . $this->user->lang['BLOG_CHOOSE_CAT'] . '</option>';
 		
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -233,10 +232,10 @@ class main_controller
 				$blog_id = (int) $this->db->sql_nextid();
 				
 				// Add it to the log
-				$this->log->add('user', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_BLOG_ADDED');
+				$this->log->add('user', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_ADDED', $blow_row['blog_subject']);
 				
 				// Send success message
-				trigger_error($this->user->lang['BLOG_ADDED'] . '<br /><br /><a href="' . $this->helper->route('posey_ultimateblog_display_blog', array('blog_id' => $blog_id)) . '">' . $this->user->lang['VIEW_BLOG'] . ' &raquo;</a>');
+				trigger_error($this->user->lang['BLOG_ADDED'] . '<br /><br /><a href="' . $this->helper->route('posey_ultimateblog_display_blog', array('blog_id' => $blog_id)) . '">' . $this->user->lang['BLOG_VIEW'] . ' &raquo;</a>');
 			}
 		}		
 		
@@ -375,7 +374,7 @@ class main_controller
 		$navlinks_array = array(
 			array(
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog'),
-				'FORUM_NAME'		=> $this->user->lang('UB_BLOG'),
+				'FORUM_NAME'		=> $this->user->lang('BLOG'),
 			),
 			array(
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_display_blog', array('blog_id' => (int) $blog['blog_id'])),
@@ -437,11 +436,11 @@ class main_controller
 		$navlinks_array = array(
 			array(
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog'),
-				'FORUM_NAME'		=> $this->user->lang('UB_BLOG'),
+				'FORUM_NAME'		=> $this->user->lang('BLOG'),
 			),
 			array(
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_categories'),
-				'FORUM_NAME'		=> $this->user->lang('UB_CATEGORIES'),
+				'FORUM_NAME'		=> $this->user->lang('CATEGORIES'),
 			)
 		);
 
@@ -454,7 +453,7 @@ class main_controller
 		}
 		
 		// Send it to the template
-		return $this->helper->render('categories.html', $this->user->lang('UB_CATEGORIES'));
+		return $this->helper->render('categories.html', $this->user->lang('BLOG_CATS'));
 	}
 	
 	public function category($cat_id)
@@ -503,7 +502,7 @@ class main_controller
 			// Cut off blog text
 			if ($this->config['ub_cutoff'] != 0)
 			{
-				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... ' . $this->user->lang['BLOG_READ_FULL'] : $text;
+				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... <a href="' . $this->helper->render('posey_ultimateblog_blog', array('blog_id' => (int) $row['blog_id'])) . ' alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '"><em>' . $this->user->lang['BLOG_READ_FULL'] . '</em></a>' : $text;
 			}
 
 			$this->template->assign_block_vars('blogs', array(
@@ -520,18 +519,18 @@ class main_controller
 		
 		$this->template->assign_vars(array(
 			'CAT_NAME'			=> $cat_name,
-			'U_UB_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', array('action' => 'add')),
+			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', array('action' => 'add')),
 		));
 		
 		// Assign breadcrumb template vars
 		$navlinks_array = array(
 			array(
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog'),
-				'FORUM_NAME'		=> $this->user->lang('UB_BLOG'),
+				'FORUM_NAME'		=> $this->user->lang('BLOG'),
 			),
 			array(
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_categories'),
-				'FORUM_NAME'		=> $this->user->lang('UB_CATEGORIES'),
+				'FORUM_NAME'		=> $this->user->lang('CATEGORIES'),
 			)
 		);
 

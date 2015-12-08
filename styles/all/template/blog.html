@@ -1,11 +1,11 @@
 <!-- INCLUDE overall_header.html -->
-<a href="{U_UB_BLOG_ADD}" class="button icon-button post-icon blog-add" title="Post a new blog">Add Blog</a>
-<h1 class="blog-name">Blog</h1>
+<a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a>
+<h1 class="blog-name">{L_BLOG}</h1>
 
 <div class="panel blog-panel">
 	<div class="inner">
 		<div class="panel bg2 blog-categories">
-			<h3>Categories</h3>
+			<h3>{L_CATEGORIES}</h3>
 			<!-- BEGIN cats -->
 				<a href="{cats.LINK}" alt="" title="{cats.NAME}">{cats.NAME}</a>
 				<!-- IF not cats.S_LAST_ROW --><br><hr><!-- ENDIF -->
@@ -15,9 +15,9 @@
 			<h2 class="blog-subject">{BLOG_SUBJECT}</h2>
 			<!-- IF BLOG_AVATAR --><div class="blog-avatar">{BLOG_AVATAR}</div><!-- ENDIF -->
 			<div class="blog-posted<!-- IF BLOG_AVATAR --> blog-posted-avatar<!-- ENDIF -->">
-				Author{L_COLON} {BLOG_POSTER}<br>
-				Category{L_COLON} <a href="{CAT_LINK}" title="{CAT_NAME}" alt="">{CAT_NAME}</a><br>
-				Post time{L_COLON} {BLOG_POST_TIME}
+				{L_BLOG_AUTHOR}{L_COLON} {BLOG_POSTER}<br>
+				{L_CATEGORY}{L_COLON} <a href="{CAT_LINK}" title="{CAT_NAME}" alt="">{CAT_NAME}</a><br>
+				{L_BLOG_POSTED_ON}{L_COLON} {BLOG_POST_TIME}
 				<!-- EDIT INFO -->
 			</div>
 			<br><br>
