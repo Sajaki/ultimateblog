@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Ultimate Blog
-* @copyright (c) 2015 posey
+* @copyright (c) 2015 posey 
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -50,7 +50,7 @@ class listener implements EventSubscriberInterface
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->php_ext			= $php_ext;
 	}
-
+	
 	static public function getSubscribedEvents()
 	{
 		return [
@@ -58,7 +58,7 @@ class listener implements EventSubscriberInterface
 			'core.page_header'		=> 'add_page_header_link',
 		];
 	}
-
+	
 	public function set_blog_lang($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];

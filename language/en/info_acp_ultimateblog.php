@@ -41,7 +41,7 @@ $lang = array_merge($lang, array(
 	'ACP_ULTIMATEBLOG_SETTINGS_TITLE'	=> 'Blog Settings',
 	'ACP_ULTIMATEBLOG_CATEGORIES_TITLE'	=> 'Blog Categories',
 	'ACP_ULTIMATEBLOG_TAGS_TITLE'		=> 'Blog Tags',
-
+	
 	'ACP_UB_CAT_ADD'			=> 'Add Category',
 	'ACP_UB_CAT_ADD_EXPLAIN'	=> 'Add a new category that can contain blog entries',
 	'ACP_UB_CAT_ADDED'			=> 'The new blog category has been created',
@@ -57,7 +57,7 @@ $lang = array_merge($lang, array(
 	'ACP_UB_CAT_BLOGS'			=> 'Blog Count',
 	'ACP_UB_CAT_NOT_EXIST'		=> 'That category doesn\'t exist!',
 	'ACP_UB_CATS_EXPLAIN'		=> 'A list of all categories available to place blog entries in',
-
+	
 	'ACP_UB_SETTINGS_SAVED'				=> 'Ultimate Blog Settings have been changed successfully',
 	'ACP_UB_SETTINGS_EXPLAIN'			=> 'Alter the settings for the Ultimate Blog extension in here',
 	'ACP_UB_SETTINGS_ENABLE'			=> 'Enable Ultimate Blog',
@@ -66,7 +66,7 @@ $lang = array_merge($lang, array(
 	'ACP_UB_SETTINGS_LATEST_BLOGS_EXPLAIN'	=> 'The amount of blogs that should be displayed on the main blogs page',
 	'ACP_UB_SETTINGS_CUTOFF'			=> 'Latest Blog Cut Off',
 	'ACP_UB_SETTINGS_CUTOFF_EXPLAIN'	=> 'Enter after how many characters the blog post should be cut off for display in the Latest Blogs.<br>Users will then have to visit the blog to read the full story.<br>Set to <strong>0</strong> to display the full blog.',
-
+	
 	'LOG_UB_SETTINGS_CHANGED'	=> 'Ultimate Blog Settings have been changed',
 	'LOG_UB_CAT_ADD'			=> 'Ultimate Blog Category has been created: %1$s',
 	'LOG_UB_CAT_EDIT'			=> 'Ultimate Blog Category has been edited: %1$s',

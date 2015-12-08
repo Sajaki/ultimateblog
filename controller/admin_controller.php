@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Ultimate Blog
-* @copyright (c) 2015 posey
+* @copyright (c) 2015 posey 
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -63,15 +63,15 @@ class admin_controller
 	{
 		$action	= $this->request->variable('action', '');
 		$id		= $this->request->variable('id', 0);
-
+		
 		add_form_key('acp_ub_settings');
 
 		$this->template->assign_vars(array(
 			'BASE'		=> $this->u_action,
 		));
-
+		
 		$submit = $this->request->variable('submit', '');
-
+		
 		if ($submit)
 		{
 			if (!check_form_key('acp_ub_settings'))
@@ -83,7 +83,7 @@ class admin_controller
 				$ub_enabled 	= $this->request->variable('ub_enabled', 1);
 				$ub_latest_blogs = $this->request->variable('ub_latest_blogs', 5);
 				$ub_cutoff 		= $this->request->variable('ub_cutoff', 1500);
-
+				
 				if ($ub_enabled != $this->config['ub_enabled'])
 				{
 					$this->config->set('ub_enabled', $ub_enabled);
@@ -96,10 +96,10 @@ class admin_controller
 				{
 					$this->config->set('ub_cutoff', $ub_cutoff);
 				}
-
+				
 				// Show success message
 				trigger_error($this->user->lang('ACP_UB_SETTINGS_SAVED') . adm_back_link($this->u_action));
-
+				
 				// Add to the log
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_SETTINGS_CHANGED');
 			}
@@ -142,9 +142,9 @@ class admin_controller
 			$result_count = $this->db->sql_query($sql);
 			$blog_count = $this->db->sql_fetchfield('blog_count');
 			$this->db->sql_freeresult($result_count);
-
+			
 			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
-								(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
+								(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) + 
 								(($row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
 
 			$this->template->assign_block_vars('cats', array(
@@ -176,24 +176,24 @@ class admin_controller
 	{
 		// Add form key
 		add_form_key('add_category');
-
+		
 		$desc = utf8_normalize_nfc($this->request->variable('cat_desc', '', true));
 		$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 		$allow_bbcode = $this->request->variable('cat_desc_bbcode', 0) == 1 ? true : false;
 		$allow_smilies = $this->request->variable('cat_desc_smilies', 0) == 1 ? true : false;
 		$allow_urls = $this->request->variable('cat_desc_urls', 0) == 1 ? true : false;
 		generate_text_for_storage($desc, $uid, $bitfield, $options, $allow_bbcode, $allow_urls, $allow_smilies);
-
+		
 		$cat_row = array(
 			'cat_name'			=> ucfirst($this->request->variable('cat_name', '', true)), // Set _$multibyte_ to true, so no need to run through utf8_normalize_nfc
 			'cat_desc'			=> $desc,
-			'bbcode_uid'		=> $uid,
-			'bbcode_bitfield'	=> $bitfield,
-			'enable_bbcode'	 => $allow_bbcode ? 1 : 0,
-			'enable_magic_url'	=> $allow_urls ? 1 : 0,
-			'enable_smilies'	=> $allow_smilies ? 1 : 0,
+			'bbcode_uid'        => $uid,
+			'bbcode_bitfield'   => $bitfield,
+			'enable_bbcode'     => $allow_bbcode ? 1 : 0,
+			'enable_magic_url'  => $allow_urls ? 1 : 0,
+			'enable_smilies'    => $allow_smilies ? 1 : 0,
 		);
-
+		
 		if ($this->request->is_set_post('submit'))
 		{
 			if (!check_form_key('add_category'))
@@ -206,15 +206,15 @@ class admin_controller
 				// Insert the category
 				$sql = 'INSERT INTO ' . $this->ub_cats_table . ' ' . $this->db->sql_build_array('INSERT', $cat_row);
 				$this->db->sql_query($sql);
-
+				
 				// Add it to the log
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_ADD', time(), array($cat_row['cat_name']));
-
+				
 				// Send success message
 				trigger_error($this->user->lang['ACP_UB_CAT_ADDED'] . adm_back_link($this->u_action));
 			}
 		}
-		else
+		else 
 		{
 			$this->template->assign_vars(array(
 				'U_ACTION'		=> $this->u_action . '&amp;action=add',
@@ -235,24 +235,24 @@ class admin_controller
 	public function edit_category($cat_id)
 	{
 		add_form_key('edit_category');
-
+		
 		$desc = utf8_normalize_nfc($this->request->variable('cat_desc', '', true));
 		$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 		$allow_bbcode = $this->request->variable('cat_desc_bbcode', 0) == 1 ? true : false;
 		$allow_smilies = $this->request->variable('cat_desc_smilies', 0) == 1 ? true : false;
 		$allow_urls = $this->request->variable('cat_desc_urls', 0) == 1 ? true : false;
 		generate_text_for_storage($desc, $uid, $bitfield, $options, $allow_bbcode, $allow_urls, $allow_smilies);
-
+		
 		$cat_row = array(
 			'cat_name'			=> ucfirst($this->request->variable('cat_name', '', true)), // Set _$multibyte_ to true, so no need to run through utf8_normalize_nfc
 			'cat_desc'			=> $desc,
-			'bbcode_uid'		=> $uid,
-			'bbcode_bitfield'	=> $bitfield,
-			'enable_bbcode'	 => $allow_bbcode ? 1 : 0,
-			'enable_smilies'	=> $allow_smilies ? 1 : 0,
-			'enable_magic_url'	=> $allow_urls ? 1 : 0,
+			'bbcode_uid'        => $uid,
+			'bbcode_bitfield'   => $bitfield,
+			'enable_bbcode'     => $allow_bbcode ? 1 : 0,
+			'enable_smilies'    => $allow_smilies ? 1 : 0,
+			'enable_magic_url'  => $allow_urls ? 1 : 0,
 		);
-
+		
 		if ($this->request->is_set_post('submit'))
 		{
 			if (!check_form_key('edit_category'))
@@ -265,15 +265,15 @@ class admin_controller
 						SET ' . $this->db->sql_build_array('UPDATE', $cat_row) . '
 						WHERE cat_id = ' . (int) $cat_id;
 				$this->db->sql_query($sql);
-
+				
 				// Add it to the logg
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_EDIT', time(), array($cat_row['cat_name']));
-
+				
 				// Send success message
 				trigger_error($this->user->lang['ACP_UB_CAT_EDITED'] . adm_back_link($this->u_action));
 			}
 		}
-
+		
 		// Grab category information
 		$sql = 'SELECT *
 				FROM ' . $this->ub_cats_table . '
@@ -281,23 +281,23 @@ class admin_controller
 		$result = $this->db->sql_query($sql);
 		$cat_row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
-
+		
 		// No valid ID
 		if (!$cat_row)
 		{
 			trigger_error($this->user->lang['ACP_UB_CAT_NOT_EXIST'] . adm_back_link($this->u_action . '&amp;mode=categories'), E_USER_WARNING);
 		}
-
+	
 		// Decode description for editing
 		decode_message($cat_row['cat_desc'], $cat_row['bbcode_uid']);
-
+		
 		$this->template->assign_vars(array(
 			'U_ACTION'		=> $this->u_action . "&amp;cat_id=$cat_id&amp;action=edit",
 			'U_BACK'		=> $this->u_action . '&amp;mode=categories',
 			'CAT_NAME'		=> $cat_row['cat_name'],
 			'CAT_DESC'		=> $cat_row['cat_desc'],
 			'CAT_ID'		=> $cat_row['cat_id'],
-
+			
 			'S_ADD_CAT'		=> true,
 			'S_CAT_DESC_BBCODE'		=> $cat_row['enable_bbcode'],
 			'S_CAT_DESC_SMILIES'	=> $cat_row['enable_smilies'],
@@ -318,7 +318,7 @@ class admin_controller
 			{
 				trigger_error($this->user->lang['ACP_UB_CAT_DEL_FIRST'] . adm_back_link($this->u_action), E_USER_WARNING);
 			}
-
+			
 			// Grab the cat name for the log
 			$sql = 'SELECT cat_name
 					FROM ' . $this->ub_cats_table . '
@@ -326,7 +326,7 @@ class admin_controller
 			$result = $this->db->sql_query($sql);
 			$cat_name = $this->db->sql_fetchfield('cat_name');
 			$this->db->sql_freeresult($result);
-
+			
 			// Delete the category
 			$sql = 'DELETE FROM ' . $this->ub_cats_table . '
 					WHERE cat_id = ' . (int) $cat_id;
@@ -356,7 +356,7 @@ class admin_controller
 				'mode'		=> 'categories',
 				'action'	=> 'delete'))
 			);
-
+			
 			// Use a redirect to take the user back to the previous page
 			// if the user chose not delete the category from the confirmation page.
 			redirect("{$this->u_action}");
@@ -368,7 +368,7 @@ class admin_controller
 
 	}
 
-	// Set u_action accordingly
+	// Set u_action accordingly 
 	public function set_page_url($u_action)
 	{
 		$this->u_action = $u_action;
