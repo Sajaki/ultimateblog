@@ -69,22 +69,22 @@ class main_controller
 		switch($action)
 		{
  			case 'add':
- 				$this->add_blog();		 				$this->add_blog();
-+				// Generate the page template
-+				return $this->helper->render('blog_add.html', $this->user->lang('BLOG_ADD'));
- 			break;		 			break;
--					+
- 			case 'edit':		 			case 'edit':
--				$this->edit_blog($blog_id);		+				$this-> ($blog_id);
-+				// Generate the page template
-+//EDIT CHANGE				return $this->helper->render('blogs_latest.html', $this->user->lang('UB_BLOGS'));
- 			break;		 			break;
--					+
- 			default:		 			default:
- 				$this->latest_blogs();		 				$this->latest_blogs();
-+				// Generate the page template
-+				return $this->helper->render('blogs_latest.html', $this->user->lang('BLOG'));
- 			break;		 			break;
+ 				$this->add_blog();
+				// Generate the page template
+				return $this->helper->render('blog_add.html', $this->user->lang('BLOG_ADD'));
+ 			break;
+					
+ 			case 'edit':
+				$this->edit_blog($blog_id);
+				// Generate the page template
+				// return $this->helper->render('blogs_latest.html', $this->user->lang('UB_BLOGS'));
+ 			break;
+					
+ 			default:
+ 				$this->latest_blogs();
+				// Generate the page template
+				return $this->helper->render('blogs_latest.html', $this->user->lang('BLOG'));
+ 			break;
 		}
 	}
 	
