@@ -1,0 +1,38 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1 class="blog-name">Blog</h1>
+<h2 class="blog-title">Blog Categories</h2>
+
+<div class="forabg">
+	<div class="inner">
+	
+		<ul class="topiclist">
+			<li class="header">
+				<dl class="icon">
+					<dt>
+						<div class="list-inner">
+							Categories
+						</div>
+					</dt>
+					<dd class="topics">Blog Posts</dd>
+				</dl>
+			</li>
+		</ul>
+		<ul class="topiclist forums">
+			<!-- BEGIN categories -->
+				<li class="row">
+					<dl class="icon forum_read">
+						<dt>
+							<div class="list-inner">
+								<a href="{categories.LINK}" alt="" class="forumtitle">{categories.NAME}</a><br>{categories.DESC}
+							</div>
+						</dt>
+						<dd class="topics">{categories.COUNT}</dd>
+					</dl>
+				</li>
+			<!-- END categories -->
+		</ul>
+	</div>
+</div>
+<br>
+<!-- INCLUDE overall_footer.html -->

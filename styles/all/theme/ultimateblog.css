@@ -1,0 +1,96 @@
+.blog-name {
+	color: #5484AD;
+	font-size: 3em;
+	font-weight: 900;
+	font-family: "Ubuntu", sans-serif;
+	margin-left: 9px;
+}
+
+.blog-title {
+	margin-left: 9px;
+}
+
+.blog {
+	clear: left;
+	width: 78%;
+}
+
+.blog-panel {
+	background-color: transparent;
+}
+
+.blog-border {
+	border-bottom: 1px solid #e4e4e4;
+}
+
+.blog-categories {
+    width: 20%;
+    float: right;
+    padding: 5px;
+	font-size: 1.1em;
+}
+
+.blog-categories h3 {
+	color: black;
+    border-bottom: 1px inset grey;
+}
+
+.blog-subject {
+	color: black !important;
+	font-weight: bold !important;
+	font-size: 2.3em !important;
+	font-family: "Ubuntu", sans-serif !important;
+	border: none !important;
+	margin-bottom: 2px !important;
+	margin-top: 6px !important;
+	padding: 0 !important;
+}
+
+.blog-subject a {
+	color: black;
+}
+
+.blog-subject a:hover {
+	text-decoration: none;
+}
+
+.blog-avatar {
+	float: left;
+	display: inline-block;
+	position: relative;
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
+
+.blog-posted {
+	font-style: italic;
+	font-size: 1.2em;
+}
+
+.blog-posted-avatar {
+	float: left;
+	display: inline-block;
+	position: relative;
+}
+
+.blog-text {
+	font-size: 1.1em;
+	clear: left;
+}
+
+.blog-add {
+	float: right;
+	margin-right: 11px;
+	margin-top: 10px;
+	font-size: 1.3em;
+}
+
+.blog-alarm {
+	font-weight: bold;
+	font-size: 1.2em;
+	color: #D21A4F;
+	display: inline-block;
+}
+
+
+
