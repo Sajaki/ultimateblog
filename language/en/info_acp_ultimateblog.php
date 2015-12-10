@@ -41,7 +41,7 @@ $lang = array_merge($lang, array(
 	'ACP_ULTIMATEBLOG_SETTINGS_TITLE'	=> 'Blog Settings',
 	'ACP_ULTIMATEBLOG_CATEGORIES_TITLE'	=> 'Blog Categories',
 	'ACP_ULTIMATEBLOG_TAGS_TITLE'		=> 'Blog Tags',
-	
+
 	'ACP_UB_CAT_ADD'			=> 'Add Category',
 	'ACP_UB_CAT_ADD_EXPLAIN'	=> 'Add a new category that can contain blog entries',
 	'ACP_UB_CAT_ADDED'			=> 'The new blog category has been created',
@@ -57,7 +57,7 @@ $lang = array_merge($lang, array(
 	'ACP_UB_CAT_BLOGS'			=> 'Blog Count',
 	'ACP_UB_CAT_NOT_EXIST'		=> 'That category doesn\'t exist!',
 	'ACP_UB_CATS_EXPLAIN'		=> 'A list of all categories available to place blog entries in',
-	
+
 	'ACP_UB_SETTINGS_SAVED'				=> 'Ultimate Blog Settings have been changed successfully',
 	'ACP_UB_SETTINGS_EXPLAIN'			=> 'Alter the settings for the Ultimate Blog extension in here',
 	'ACP_UB_SETTINGS_ENABLE'			=> 'Enable Ultimate Blog',
@@ -66,9 +66,29 @@ $lang = array_merge($lang, array(
 	'ACP_UB_SETTINGS_LATEST_BLOGS_EXPLAIN'	=> 'The amount of blogs that should be displayed on the main blogs page',
 	'ACP_UB_SETTINGS_CUTOFF'			=> 'Latest Blog Cut Off',
 	'ACP_UB_SETTINGS_CUTOFF_EXPLAIN'	=> 'Enter after how many characters the blog post should be cut off for display in the Latest Blogs.<br>Users will then have to visit the blog to read the full story.<br>Set to <strong>0</strong> to display the full blog.',
-	
+
 	'LOG_UB_SETTINGS_CHANGED'	=> 'Ultimate Blog Settings have been changed',
 	'LOG_UB_CAT_ADD'			=> 'Ultimate Blog Category has been created: %1$s',
 	'LOG_UB_CAT_EDIT'			=> 'Ultimate Blog Category has been edited: %1$s',
 	'LOG_UB_CAT_DELETE'			=> 'Ultimate Blog Category has been deleted: %1$s',
+
+	// Permissions
+	'ACL_CAT_ULTIMATEBLOG'			=> 'Ultimate Blog',
+	'ACL_U_BLOG_VIEW'				=> 'Can view blogs',
+	'ACL_U_BLOG_MAKE'				=> 'Can create blogs',
+	'ACL_U_BLOG_EDIT'				=> 'Can edit own blogs',
+	'ACL_U_BLOG_RATE'				=> 'Can rate blogs',
+	'ACL_U_BLOG_REPORT'				=> 'Can report blogs',
+	'ACL_U_BLOG_COMMENT_MAKE'		=> 'Can comment on blogs',
+	'ACL_U_BLOG_COMMENT_EDIT'		=> 'Can edit own comments',
+	'ACL_U_BLOG_COMMENT_REPORT'		=> 'Can report comments',
+	'ACL_M_BLOG_EDIT'				=> 'Can edit blogs',
+	'ACL_M_BLOG_DELETE'				=> 'Can delete blogs',
+	'ACL_M_BLOG_LOCK'				=> 'Can lock blogs',
+	'ACL_M_BLOG_COMMENT_EDIT'		=> 'Can edit comments',
+	'ACL_M_BLOG_COMMENT_DELETE'		=> 'Can delete comments',
+	'ACL_M_BLOG_REPORTS'			=> 'Can manage reported blogs/comments',
+	'ACL_A_BLOG_SETTINGS'			=> 'Can manage blog settings',
+	'ACL_A_BLOG_CATEGORIES'			=> 'Can manage blog categories',
+	'ACL_A_BLOG_TAGS'				=> 'Can manage blog tags',
 ));

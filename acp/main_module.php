@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Ultimate Blog
-* @copyright (c) 2015 posey 
+* @copyright (c) 2015 posey
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -12,11 +12,11 @@ namespace posey\ultimateblog\acp;
 class main_module
 {
 	public $u_action;
-	
+
 	function main($id, $mode)
 	{
 		global $phpbb_container, $request, $user;
-		
+
 		// Get the Admin Controller
 		$admin_controller = $phpbb_container->get('posey.ultimateblog.admin.controller');
 

@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Ultimate Blog
-* @copyright (c) 2015 posey 
+* @copyright (c) 2015 posey
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
@@ -50,15 +50,16 @@ class listener implements EventSubscriberInterface
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->php_ext			= $php_ext;
 	}
-	
+
 	static public function getSubscribedEvents()
 	{
 		return [
 			'core.user_setup'		=> 'set_blog_lang',
 			'core.page_header'		=> 'add_page_header_link',
+			'core.permissions'		=> 'permissions',
 		];
 	}
-	
+
 	public function set_blog_lang($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];
@@ -74,5 +75,83 @@ class listener implements EventSubscriberInterface
 		$this->template->assign_vars(array(
 			'U_UB_BLOG'		=> $this->helper->route('posey_ultimateblog_blog'),
 		));
+	}
+
+	public function permissions($event)
+	{
+		$permissions = $event['permissions'];
+		$permissions += array(
+			'u_blog_view'		=> array(
+				'lang'		=> 'ACL_U_BLOG_VIEW',
+				'cat'		=> 'ultimateblog'
+			),
+			'u_blog_make'	=> array(
+				'lang'		=> 'ACL_U_BLOG_MAKE',
+				'cat'		=> 'ultimateblog'
+			),
+			'u_blog_edit'	=> array(
+				'lang'		=> 'ACL_U_BLOG_EDIT',
+				'cat'		=> 'ultimateblog'
+			),
+			'u_blog_rate'	=> array(
+				'lang'		=> 'ACL_U_BLOG_RATE',
+				'cat'		=> 'ultimateblog'
+			),
+			'u_blog_report'	=> array(
+				'lang'		=> 'ACL_U_BLOG_REPORT',
+				'cat'		=> 'ultimateblog'
+			),
+			'u_blog_comment_make'	=> array(
+				'lang'		=> 'ACL_U_BLOG_COMMENT_MAKE',
+				'cat'		=> 'ultimateblog'
+			),
+			'u_blog_comment_edit'	=> array(
+				'lang'		=> 'ACL_U_BLOG_COMMENT_EDIT',
+				'cat'		=> 'ultimateblog'
+			),
+			'u_blog_comment_report'	=> array(
+				'lang'		=> 'ACL_U_BLOG_COMMENT_REPORT',
+				'cat'		=> 'ultimateblog'
+			),
+			'm_blog_edit'	=> array(
+				'lang'		=> 'ACL_M_BLOG_EDIT',
+				'cat'		=> 'ultimateblog'
+			),
+			'm_blog_delete'	=> array(
+				'lang'		=> 'ACL_M_BLOG_DELETE',
+				'cat'		=> 'ultimateblog'
+			),
+			'm_blog_lock'	=> array(
+				'lang'		=> 'ACL_M_BLOG_LOCK',
+				'cat'		=> 'ultimateblog'
+			),
+			'm_blog_comment_edit'	=> array(
+				'lang'		=> 'ACL_M_BLOG_COMMENT_EDIT',
+				'cat'		=> 'ultimateblog'
+			),
+			'm_blog_comment_delete'	=> array(
+				'lang'		=> 'ACL_M_BLOG_COMMENT_DELETE',
+				'cat'		=> 'ultimateblog'
+			),
+			'm_blog_reports'	=> array(
+				'lang'		=> 'ACL_M_BLOG_REPORTS',
+				'cat'		=> 'ultimateblog'
+			),
+			'a_blog_settings'	=> array(
+				'lang'		=> 'ACL_A_BLOG_SETTINGS',
+				'cat'		=> 'ultimateblog'
+			),
+			'a_blog_categories'	=> array(
+				'lang'		=> 'ACL_A_BLOG_CATEGORIES',
+				'cat'		=> 'ultimateblog'
+			),
+			'a_blog_tags'		=> array(
+				'lang'		=> 'ACL_A_BLOG_TAGS',
+				'cat'		=> 'ultimateblog',
+			),
+		);
+		$event['permissions'] = $permissions;
+		$categories['ultimateblog'] = 'ACL_CAT_ULTIMATEBLOG';
+		$event['categories'] = array_merge($event['categories'], $categories);
 	}
 }

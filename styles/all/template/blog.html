@@ -13,12 +13,17 @@
 		</div>
 		<div class="blog">
 			<h2 class="blog-subject">{BLOG_SUBJECT}</h2>
+			<a href="{U_BLOG_EDIT}" class="button icon-button edit-icon blog-edit" title="L_BLOG_EDIT">{L_BLOG_EDIT}</a>
 			<!-- IF BLOG_AVATAR --><div class="blog-avatar">{BLOG_AVATAR}</div><!-- ENDIF -->
 			<div class="blog-posted<!-- IF BLOG_AVATAR --> blog-posted-avatar<!-- ENDIF -->">
 				{L_BLOG_AUTHOR}{L_COLON} {BLOG_POSTER}<br>
 				{L_CATEGORY}{L_COLON} <a href="{CAT_LINK}" title="{CAT_NAME}" alt="">{CAT_NAME}</a><br>
 				{L_BLOG_POSTED_ON}{L_COLON} {BLOG_POST_TIME}
-				<!-- EDIT INFO -->
+				<!-- IF S_EDITED -->
+					<br>{EDIT_LAST}<br>
+					<!-- IF EDIT_REASON -->{L_BLOG_EDIT_REASON}{L_COLON} {EDIT_REASON}<br><!-- ENDIF -->
+					{EDIT_COUNT}
+				<!-- ENDIF -->
 			</div>
 			<br><br>
 			<div class="blog-text">
@@ -28,5 +33,5 @@
 		</div>
 	</div>
 </div>
-		
+
 <!-- INCLUDE overall_footer.html -->

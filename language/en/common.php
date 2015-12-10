@@ -41,21 +41,41 @@ $lang = array_merge($lang, array(
 	'BLOG_ADD'			=> 'Add blog',
 	'BLOG_ADDED'		=> 'Your blog has been succesfully added',
 	'BLOG_AUTHOR'		=> 'Author',
+	'BLOG_BACK'			=> 'Back to the blog page',
 	'BLOG_CATS'			=> 'Blog Categories',
 	'BLOG_CHOOSE_CAT'	=> 'Choose a category..',
+	'BLOG_EDIT'			=> 'Edit blog',
+	'BLOG_EDITED'		=> 'The blog has been successfully edited',
+	'BLOG_EDIT_COUNT'	=> array(
+		1	=> 'This blog has been edited %1$s time in total', // singular
+		2	=> 'This blog has been edited %1$s times in total', // plural
+	),
+	'BLOG_EDIT_LAST'	=> 'This blog was last edited by %1$s on %2$s', // 1 = user | 2 = date
+	'BLOG_EDIT_LOCKED'	=> 'This blog has been locked from any further editing and you\'re not authorised to edit it anymore!',
+	'BLOG_EDIT_REASON'	=> 'Reason for editing',
 	'BLOG_FOR_CAT'		=> 'Blogs for category',
-	'BLOG_IN'			=> 'in', // example: Someone posted “in” My Awesome Category “on” Dec 12th, 2015
+	'BLOG_IN'			=> 'in', // example: Posted by Someone “in” My Awesome Category “on” Dec 12th, 2015
 	'BLOG_ON'			=> 'on', // See example above
 	'BLOG_NEW'			=> 'New blog entry',
+	'BLOG_NOT_EXIST'	=> 'The requested blog does not exist..',
 	'BLOG_POSTED_BY'	=> 'Posted by',
 	'BLOG_POSTED_ON'	=> 'Posted on',
 	'BLOG_POSTS'		=> 'Blog Posts',
 	'BLOG_READ_FULL'	=> 'Read the full blog',
 	'BLOG_VIEW'			=> 'View your blog',
-	
+
 	'CAT_NO_BLOGS'		=> 'This category does not have any blogs yet',
 	'CATEGORY'			=> 'Category',
 	'CATEGORIES'		=> 'Categories',
-	
+
+	'ENABLE_COMMENTS'	=> 'Enable Comments',
+
+	'LOCK_EDIT'			=> 'Lock editing',
+
 	'LOG_BLOG_ADDED'	=> 'New blog entry: %1$s',
+	'LOG_BLOG_EDITED'	=> 'Blog has been edited: %1$s',
+
+	'PARSE_BBCODE'		=> 'Parse BBCode',
+	'PARSE_SMILIES'		=> 'Parse Smilies',
+	'PARSE_URLS'		=> 'Parse URL\'s',
 ));

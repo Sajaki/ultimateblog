@@ -85,6 +85,13 @@
 	font-size: 1.3em;
 }
 
+.blog-edit {
+	float: right;
+	margin-top: -5px;
+	margin-right: 10px;
+	font-size: 1.3em;
+}
+
 .blog-alarm {
 	font-weight: bold;
 	font-size: 1.2em;
