@@ -54,9 +54,10 @@ class listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return [
-			'core.user_setup'		=> 'set_blog_lang',
-			'core.page_header'		=> 'add_page_header_link',
-			'core.permissions'		=> 'permissions',
+			'core.user_setup'						=> 'set_blog_lang',
+			'core.page_header'						=> 'add_page_header_link',
+			'core.permissions'						=> 'permissions',
+			'core.viewonline_overwrite_location'	=> 'viewonline_page',
 		];
 	}
 
@@ -72,9 +73,30 @@ class listener implements EventSubscriberInterface
 
 	public function add_page_header_link($event)
 	{
-		$this->template->assign_vars(array(
-			'U_UB_BLOG'		=> $this->helper->route('posey_ultimateblog_blog'),
-		));
+		if ($this->config['ub_enabled'] == 1)
+		{
+			$this->template->assign_vars([
+				'S_BLOG_ENABLED'	=> true,
+				'U_BLOG'			=> $this->helper->route('posey_ultimateblog_blog'),
+			]);
+		}
+	}
+
+	public function viewonline_page($event)
+	{
+		if ($event['on_page'][1] == 'app')
+		{
+			if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/blog') === 0)
+			{
+				$event['location'] = $this->user->lang('BLOG_VIEWONLINE');
+				$event['location_url'] = $this->helper->route('posey_ultimateblog_blog');
+			}
+			else if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/categor') === 0)
+			{
+				$event['location'] = $this->user->lang('CAT_VIEWONLINE');
+				$event['location_url'] = $this->helper->route('posey_ultimateblog_categories');
+			}
+		}
 	}
 
 	public function permissions($event)

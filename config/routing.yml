@@ -2,14 +2,18 @@ posey_ultimateblog_blog:
     path: /blog
     defaults: { _controller: posey.ultimateblog.controller:blog }
 
-posey_ultimateblog_display_blog:
+posey_ultimateblog_blog_display:
     path: /blog/{blog_id}
-    defaults: { _controller: posey.ultimateblog.controller:display_blog }
+    defaults: { _controller: posey.ultimateblog.controller:blog_display }
 
 posey_ultimateblog_categories:
-    path: /categories
+    path: /blog/categories
     defaults: { _controller: posey.ultimateblog.controller:categories }
 
 posey_ultimateblog_category:
-    path: /categories/{cat_id}
+    path: /blog/categories/{cat_id}
     defaults: { _controller: posey.ultimateblog.controller:category }
+
+posey_ultimateblog_archive:
+    path: /blog/archive/{year}-{month}
+    defaults: { _controller: posey.ultimateblog.controller:archive }

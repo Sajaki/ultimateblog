@@ -37,16 +37,19 @@ if (empty($lang) || !is_array($lang))
 //
 // Merge the following language entries into the lang array
 $lang = array_merge($lang, array(
-	'BLOG'				=> 'Blog',
-	'BLOG_ADD'			=> 'Add blog',
-	'BLOG_ADDED'		=> 'Your blog has been succesfully added',
-	'BLOG_AUTHOR'		=> 'Author',
-	'BLOG_BACK'			=> 'Back to the blog page',
-	'BLOG_CATS'			=> 'Blog Categories',
-	'BLOG_CHOOSE_CAT'	=> 'Choose a category..',
-	'BLOG_EDIT'			=> 'Edit blog',
-	'BLOG_EDITED'		=> 'The blog has been successfully edited',
-	'BLOG_EDIT_COUNT'	=> array(
+	'BLOG'					=> 'Blog',
+	'BLOG_ADD'				=> 'Add blog',
+	'BLOG_ADDED'			=> 'Your blog has been succesfully added',
+	'BLOG_AUTHOR'			=> 'Author',
+	'BLOG_BACK'				=> 'Back to the blog page',
+	'BLOG_CATS'				=> 'Blog Categories',
+	'BLOG_CHOOSE_CAT'		=> 'Choose a category..',
+	'BLOG_DELETE'			=> 'Delete blog',
+	'BLOG_DELETED'			=> 'The blog has been successfully deleted',
+	'BLOG_DELETE_CONFIRM'	=> 'Are you sure you wish to delete this blog?',
+	'BLOG_EDIT'				=> 'Edit blog',
+	'BLOG_EDITED'			=> 'The blog has been successfully edited',
+	'BLOG_EDIT_COUNT'		=> array(
 		1	=> 'This blog has been edited %1$s time in total', // singular
 		2	=> 'This blog has been edited %1$s times in total', // plural
 	),
@@ -63,10 +66,18 @@ $lang = array_merge($lang, array(
 	'BLOG_POSTS'		=> 'Blog Posts',
 	'BLOG_READ_FULL'	=> 'Read the full blog',
 	'BLOG_VIEW'			=> 'View your blog',
+	'BLOG_VIEWONLINE'	=> 'Viewing blogs',
+
+	'AUTH_BLOG_ADD'			=> 'You\'re not authorised to add a new blog.',
+	'AUTH_BLOG_DELETE'		=> 'You\'re not authorised to delete this blog.',
+	'AUTH_BLOG_EDIT'		=> 'You\'re not authorised to edit this blog.',
+	'AUTH_BLOG_EDIT_ELSE'	=> 'You\'re not authorised to edit someone else\'s blog.',
+	'AUTH_BLOG_VIEW'		=> 'You\'re not authorised to view a blog.',
 
 	'CAT_NO_BLOGS'		=> 'This category does not have any blogs yet',
 	'CATEGORY'			=> 'Category',
 	'CATEGORIES'		=> 'Categories',
+	'CAT_VIEWONLINE'	=> 'Viewing blog categories',
 
 	'ENABLE_COMMENTS'	=> 'Enable Comments',
 
@@ -74,6 +85,7 @@ $lang = array_merge($lang, array(
 
 	'LOG_BLOG_ADDED'	=> 'New blog entry: %1$s',
 	'LOG_BLOG_EDITED'	=> 'Blog has been edited: %1$s',
+	'LOG_BLOG_DELETED'	=> 'Blog has been deleted; %1$s',
 
 	'PARSE_BBCODE'		=> 'Parse BBCode',
 	'PARSE_SMILIES'		=> 'Parse Smilies',

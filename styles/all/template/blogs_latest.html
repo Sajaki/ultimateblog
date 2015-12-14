@@ -1,16 +1,10 @@
 <!-- INCLUDE overall_header.html -->
-<a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a>
+<!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
 <h1 class="blog-name">{L_BLOG}</h1>
 
 <div class="panel blog-panel">
 	<div class="inner">
-		<div class="panel bg2 blog-categories">
-			<h3>{L_CATEGORIES}</h3>
-			<!-- BEGIN cats -->
-				<a href="{cats.LINK}" alt="" title="{cats.NAME}">{cats.NAME}</a>
-				<!-- IF not cats.S_LAST_ROW --><br><hr><!-- ENDIF -->
-			<!-- END cats -->
-		</div>
+		<!-- INCLUDE sidebar.html -->
 		<!-- BEGIN blogs -->
 			<div class="blog<!-- IF not blogs.S_LAST_ROW --> blog-border<!-- ENDIF -->">
 				<!-- IF not blogs.S_FIRST_ROW --><br><!-- ENDIF -->

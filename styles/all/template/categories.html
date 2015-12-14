@@ -1,9 +1,10 @@
 <!-- INCLUDE overall_header.html -->
-<a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a>
+<!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
 <h1 class="blog-name">{L_BLOG}</h1>
 <h2 class="blog-title">{L_BLOG_CATS}</h2>
 
-<div class="forabg">
+<!-- INCLUDE sidebar.html -->
+<div class="forabg blog">
 	<div class="inner">
 
 		<ul class="topiclist">

@@ -1,19 +1,14 @@
 <!-- INCLUDE overall_header.html -->
-<a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a>
+<!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
 <h1 class="blog-name">{L_BLOG}</h1>
 
 <div class="panel blog-panel">
 	<div class="inner">
-		<div class="panel bg2 blog-categories">
-			<h3>{L_CATEGORIES}</h3>
-			<!-- BEGIN cats -->
-				<a href="{cats.LINK}" alt="" title="{cats.NAME}">{cats.NAME}</a>
-				<!-- IF not cats.S_LAST_ROW --><br><hr><!-- ENDIF -->
-			<!-- END cats -->
-		</div>
+		<!-- INCLUDE sidebar.html -->
 		<div class="blog">
 			<h2 class="blog-subject">{BLOG_SUBJECT}</h2>
-			<a href="{U_BLOG_EDIT}" class="button icon-button edit-icon blog-edit" title="L_BLOG_EDIT">{L_BLOG_EDIT}</a>
+			<!-- IF S_BLOG_CAN_DELETE --><a href="{U_BLOG_DELETE}" class="button icon-button blog-edit" title="{L_BLOG_DELETE}">{L_BLOG_DELETE}</a><!-- ENDIF -->
+			<!-- IF S_BLOG_CAN_EDIT --><a href="{U_BLOG_EDIT}" class="button icon-button edit-icon blog-edit" title="{L_BLOG_EDIT}">{L_BLOG_EDIT}</a><!-- ENDIF -->
 			<!-- IF BLOG_AVATAR --><div class="blog-avatar">{BLOG_AVATAR}</div><!-- ENDIF -->
 			<div class="blog-posted<!-- IF BLOG_AVATAR --> blog-posted-avatar<!-- ENDIF -->">
 				{L_BLOG_AUTHOR}{L_COLON} {BLOG_POSTER}<br>

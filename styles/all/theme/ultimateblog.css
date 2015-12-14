@@ -26,6 +26,7 @@
 .blog-categories {
     width: 20%;
     float: right;
+	clear: right;
     padding: 5px;
 	font-size: 1.1em;
 }
@@ -90,6 +91,12 @@
 	margin-top: -5px;
 	margin-right: 10px;
 	font-size: 1.3em;
+}
+
+.blog-read-full {
+	font-weight: bold;
+	font-style: italic;
+	color: inherit;
 }
 
 .blog-alarm {

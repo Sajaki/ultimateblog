@@ -23,19 +23,13 @@ services:
         class: posey\ultimateblog\controller\main_controller
         arguments:
            - @user
-           - @template
-           - @dbal.conn
-           - @log
            - @config
-           - @auth
            - @controller.helper
            - @request
-           - @pagination
            - %core.root_path%
            - %core.php_ext%
-           - %posey.ultimateblog.table.ub.blogs%
-           - %posey.ultimateblog.table.ub.cats%
-           - %posey.ultimateblog.table.ub.comments%
+           - @posey.ultimateblog.core.blog
+           - @posey.ultimateblog.core.category
 
     posey.ultimateblog.listener:
         class: posey\ultimateblog\event\listener
@@ -51,3 +45,50 @@ services:
            - %core.php_ext%
         tags:
            - { name: event.listener }
+
+    posey.ultimateblog.core.blog:
+        class: posey\ultimateblog\core\blog
+        arguments:
+           - @user
+           - @template
+           - @dbal.conn
+           - @log
+           - @config
+           - @auth
+           - @controller.helper
+           - @request
+           - @pagination
+           - %core.root_path%
+           - %core.php_ext%
+           - %posey.ultimateblog.table.ub.blogs%
+           - %posey.ultimateblog.table.ub.cats%
+           - %posey.ultimateblog.table.ub.comments%
+           - @posey.ultimateblog.core.functions
+
+    posey.ultimateblog.core.category:
+        class: posey\ultimateblog\core\category
+        arguments:
+           - @user
+           - @template
+           - @dbal.conn
+           - @log
+           - @config
+           - @auth
+           - @controller.helper
+           - @request
+           - @pagination
+           - %core.root_path%
+           - %core.php_ext%
+           - %posey.ultimateblog.table.ub.blogs%
+           - %posey.ultimateblog.table.ub.cats%
+           - @posey.ultimateblog.core.functions
+
+    posey.ultimateblog.core.functions:
+        class: posey\ultimateblog\core\functions
+        arguments:
+            - @template
+            - @dbal.conn
+            - @controller.helper
+            - @user
+            - %posey.ultimateblog.table.ub.blogs%
+            - %posey.ultimateblog.table.ub.cats%

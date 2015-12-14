@@ -22,7 +22,7 @@ class m2_first_data extends \phpbb\db\migration\migration
 			// Add Config
 			array('config.add', array('ub_version', 1.0)),
 			array('config.add', array('ub_enabled', 1)),
-			array('config.add', array('ub_latest_blogs', 1)),
+			array('config.add', array('ub_latest_blogs', 5)),
 			array('config.add', array('ub_cutoff', 1500)),
 			// Add permission
 			array('permission.add', array('u_blog_view', true)),

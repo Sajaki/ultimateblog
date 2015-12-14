@@ -1,0 +1,16 @@
+<div class="blog-categories">
+	<div class="panel bg2">
+		<h3>{L_CATEGORIES}</h3>
+		<!-- BEGIN cats -->
+			<a href="{cats.LINK}" alt="" title="{cats.NAME}">{cats.NAME}</a>
+			<!-- IF not cats.S_LAST_ROW --><br><hr><!-- ENDIF -->
+		<!-- END cats -->
+	</div>
+	<div class="panel bg2">
+		<h3>Archive</h3>
+		<!-- BEGIN archive -->
+			{archive.MONTH_YEAR}
+			<!-- IF not archive.S_LAST_ROW --><br><hr><!-- ENDIF -->
+		<!-- END archive -->
+	</div>
+</div>
