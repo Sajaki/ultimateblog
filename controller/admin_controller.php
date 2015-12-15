@@ -21,7 +21,7 @@ class admin_controller
 	protected $request;
 	protected $pagination;
 	protected $phpbb_root_path;
-	protected $php_ext;
+	protected $phpbb_admin_path;
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
 
@@ -53,7 +53,7 @@ class admin_controller
 		$this->request	= $request;
 		$this->pagination		= $pagination;
 		$this->phpbb_root_path	= $phpbb_root_path;
-		$this->php_ext			= $php_ext;
+		$this->phpbb_admin_path	= $phpbb_admin_path;
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
 	}
@@ -177,7 +177,7 @@ class admin_controller
 		// Add form key
 		add_form_key('add_category');
 
-		$desc = utf8_normalize_nfc($this->request->variable('cat_desc', '', true));
+		$desc = $this->request->variable('cat_desc', '', true);
 		$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 		$allow_bbcode = $this->request->variable('cat_desc_bbcode', 0) == 1 ? true : false;
 		$allow_smilies = $this->request->variable('cat_desc_smilies', 0) == 1 ? true : false;
@@ -236,7 +236,7 @@ class admin_controller
 	{
 		add_form_key('edit_category');
 
-		$desc = utf8_normalize_nfc($this->request->variable('cat_desc', '', true));
+		$desc = $this->request->variable('cat_desc', '', true);
 		$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 		$allow_bbcode = $this->request->variable('cat_desc_bbcode', 0) == 1 ? true : false;
 		$allow_smilies = $this->request->variable('cat_desc_smilies', 0) == 1 ? true : false;

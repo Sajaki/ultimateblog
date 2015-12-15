@@ -6,8 +6,12 @@ posey_ultimateblog_blog_display:
     path: /blog/{blog_id}
     defaults: { _controller: posey.ultimateblog.controller:blog_display }
 
+posey_ultimateblog_comment:
+    path: /blog/{blog_id}/comment
+    defaults: { _controller: posey.ultimateblog.controller:comment }
+
 posey_ultimateblog_categories:
-    path: /blog/categories
+    path: /blog/categories/
     defaults: { _controller: posey.ultimateblog.controller:categories }
 
 posey_ultimateblog_category:

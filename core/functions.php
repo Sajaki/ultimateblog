@@ -15,8 +15,15 @@ class functions
 	protected $db;
 	protected $helper;
 	protected $user;
+	protected $config;
+	protected $auth;
+	protected $log;
+	protected $request;
+	protected $phpbb_root_path;
+	protected $php_ext;
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
+	protected $ub_comments_table;
 
 	/**
 	* Constructor
@@ -26,15 +33,29 @@ class functions
 		\phpbb\db\driver\driver_interface $db,
 		\phpbb\controller\helper $helper,
 		\phpbb\user $user,
+		\phpbb\config\config $config,
+		\phpbb\auth\auth $auth,
+		\phpbb\log\log $log,
+		\phpbb\request\request $request,
+		$phpbb_root_path,
+		$php_ext,
 		$ub_blogs_table,
-		$ub_cats_table)
+		$ub_cats_table,
+		$ub_comments_table)
 	{
 		$this->template	= $template;
 		$this->db		= $db;
 		$this->helper	= $helper;
 		$this->user		= $user;
+		$this->config	= $config;
+		$this->auth		= $auth;
+		$this->log		= $log;
+		$this->request	= $request;
+		$this->phpbb_root_path	= $phpbb_root_path;
+		$this->php_ext			= $php_ext;
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
+		$this->ub_comments_table = $ub_comments_table;
 	}
 
 	function sidebar()
@@ -63,6 +84,8 @@ class functions
 		{
 			$this->template->assign_block_vars('archive', [
 				'MONTH_YEAR'		=> $this->user->format_date($row['post_time'], 'F Y'),
+
+				'U_ARCHIVE_LINK'	=> $this->helper->route('posey_ultimateblog_archive', ['year' => (int) $this->user->format_date($row['post_time'], 'Y'), 'month' => (int) $this->user->format_date($row['post_time'], 'n')]),
 			]);
 		}
 		$this->db->sql_freeresult($result);
@@ -73,7 +96,7 @@ class functions
 		// When blog is disabled, redirect users back to the forum index
 		if ($this->config['ub_enabled'] == 0)
 		{
-			redirect(append_sid("{$this->root_path}index.{$this->php_ext}"));
+			redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}"));
 		}
 
 		// Check if user can view blogs
@@ -83,15 +106,14 @@ class functions
 		}
 
 		$sql_array = [
-			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour, c.cat_name',
+			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour',
 
 			'FROM'		=> [$this->ub_blogs_table => 'b'],
 
 			'LEFT_JOIN' => [
 				[
-					'FROM'	=> [USERS_TABLE => 'u',
-								$this->ub_cats_table => 'c'],
-					'ON'	=> 'b.poster_id = u.user_id AND b.cat_id = c.cat_id',
+					'FROM'	=> [USERS_TABLE => 'u'],
+					'ON'	=> 'b.poster_id = u.user_id',
 				]
 			],
 
@@ -106,6 +128,14 @@ class functions
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
+			// Get category name
+			$cat_sql = 'SELECT cat_name
+						FROM ' . $this->ub_cats_table . '
+						WHERE cat_id = ' . (int) $row['cat_id'];
+			$cat_result = $this->db->sql_query($cat_sql);
+			$cat_name = $this->db->sql_fetchfield('cat_name');
+			$this->db->sql_freeresult($cat_result);
+
 			// Check BBCode Options
 			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 								(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
@@ -121,7 +151,7 @@ class functions
 			}
 
 			$this->template->assign_block_vars('blogs', [
-				'CAT'		=> $row['cat_name'],
+				'CAT'		=> $cat_name,
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
@@ -137,7 +167,7 @@ class functions
 		$this->db->sql_freeresult($result);
 
 		$this->template->assign_vars([
-			'CAT_NAME'			=> $cat_name,
+			'ARCHIVE_TITLE'		=> $archive_title,
 
 			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
 			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
@@ -145,9 +175,6 @@ class functions
 
 		// Get sidebar
 		$this->sidebar();
-
-		// Get sidebar
-		$this->functions->sidebar();
 
 		// Assign breadcrumb template vars
 		$navlinks_array = [
@@ -171,5 +198,160 @@ class functions
 
 		// Generate page title
 		page_header($archive_title);
+	}
+
+	function comment_delete($blog_id, $comment_id)
+	{
+		if (!$this->auth->acl_get('m_blog_comment_delete'))
+		{
+			trigger_error($this->user->lang['AUTH_COMMENT_DELETE'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+		}
+		else
+		{
+			if (confirm_box(true))
+			{
+				$sql = 'DELETE FROM ' . $this->ub_comments_table . '
+						WHERE comment_id = ' . (int) $comment_id;
+				$this->db->sql_query($sql);
+
+				trigger_error($this->user->lang['BLOG_COMMENT_DELETED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+			else
+			{
+				$s_hidden_fields = build_hidden_fields([
+					'comment_id' 	=> $comment_id,
+					'action'		=> 'delete',
+				]);
+
+				confirm_box(false, $this->user->lang['BLOG_COMMENT_DEL_CONFIRM'], $s_hidden_fields);
+
+				// Use a redirect to take the user back to the previous page
+				// if the user chose not delete the comment from the confirmation page.
+				redirect($this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]));
+			}
+		}
+	}
+
+	function comment_edit($blog_id, $comment_id)
+	{
+		$sql = 'SELECT *
+				FROM ' . $this->ub_comments_table . '
+				WHERE comment_id = ' . (int) $comment_id;
+		$result = $this->db->sql_query($sql);
+		$comment = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		if (!$comment)
+		{
+			trigger_error($this->user->lang['BLOG_COMMENT_NOT_EXIST'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+		}
+
+		// Check if authorised to edit this comment
+		if (!$this->auth->acl_gets('u_blog_comment_edit', 'm_blog_comment_edit'))
+		{
+			trigger_error($this->user->lang['AUTH_COMMENT_EDIT'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BLOG_BACK'] . '</a>');
+		}
+
+		if (($this->auth->acl_get('u_blog_edit') && $comment['poster_id'] != $this->user->data['user_id']) && !$this->auth->acl_get('m_blog_comment_edit'))
+		{
+			trigger_error($this->user->lang['AUTH_COMMENT_EDIT_ELSE'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BLOG_BACK'] . '</a>');
+		}
+
+		if (!function_exists('generate_smilies'))
+		{
+			include($this->phpbb_root_path . 'includes/functions_posting.' . $this->php_ext);
+		}
+
+		if (!function_exists('display_custom_bbcodes'))
+		{
+			include($this->phpbb_root_path . 'includes/functions_display.' . $this->php_ext);
+		}
+
+		// Add lang file
+		$this->user->add_lang('posting');
+		display_custom_bbcodes();
+		generate_smilies('inline', 0);
+
+		// Generate text for editing
+		decode_message($comment['comment_text'], $comment['bbcode_uid']);
+
+		$this->template->assign_vars([
+			'MESSAGE'	=> $comment['comment_text'],
+
+			'S_FORM_ENCTYPE'	=> '',
+			'S_BBCODE_ALLOWED'	=> $this->config['allow_bbcode'] ? true : false,
+			'S_SMILIES_STATUS'	=> $this->config['allow_smilies'] ? true : false,
+		]);
+
+		add_form_key('edit_comment');
+
+		if ($this->request->is_set_post('submit'))
+		{
+			if (!check_form_key('edit_comment'))
+			{
+				// Invalid form key
+				trigger_error($this->user->lang['FORM_INVALID'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_comment', ['blog_id' => (int) $blog_id, 'comment_id' => (int) $comment_id, 'action' => 'edit']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+			else if ($this->request->variable('comment_text', '', true) == '')
+			{
+				// Empty comment message
+				trigger_error($this->user->lang['BLOG_COMMENT_EMPTY'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_comment', ['blog_id' => (int) $blog_id, 'comment_id' => (int) $comment_id, 'action' => 'edit']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+			else
+			{
+				// Generate text for storage
+				$comment_text = $this->request->variable('comment_text', '', true);
+				$uid = $bitfield = $options = '';
+				$allow_bbcode = $this->config['allow_bbcode'];
+				$allow_smilies = $this->config['allow_smilies'];
+				$allow_urls = $this->config['allow_post_links'];
+				generate_text_for_storage($comment_text, $uid, $bitfield, $options, $allow_bbcode, $allow_smilies, $allow_urls);
+
+				$comment_row= [
+					'comment_text'		=> $comment_text,
+					'bbcode_uid'		=> $uid,
+					'bbcode_bitfield'	=> $bitfield,
+					'bbcode_options'	=> $options,
+				];
+
+				// Update the blog
+				$sql = 'UPDATE ' . $this->ub_comments_table . ' SET ' . $this->db->sql_build_array('UPDATE', $comment_row) . ' WHERE comment_id = ' . (int) $comment_id;
+				$this->db->sql_query($sql);
+
+				// Add it to the log
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_COMMENT_EDITED', time(), (int) $comment_id);
+
+				// Send success message
+				trigger_error($this->user->lang['BLOG_COMMENT_EDITED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '#c' . (int) $comment_id . '">' . $this->user->lang['BLOG_COMMENT_VIEW'] . ' &raquo;</a>');
+			}
+		}
+
+		// Grab blog subject for Nav links
+		$sql = 'SELECT blog_subject
+				FROM ' . $this->ub_blogs_table . '
+				WHERE blog_id = ' . (int) $blog_id;
+		$result = $this->db->sql_query($sql);
+		$blog_subject = $this->db->sql_fetchfield('blog_subject');
+		$this->db->sql_freeresult($result);
+
+		// Assign breadcrumb template vars
+		$navlinks_array = [
+			[
+				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog'),
+				'FORUM_NAME'		=> $this->user->lang('BLOG'),
+			],
+			[
+				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]),
+				'FORUM_NAME'		=> $blog_subject,
+			]
+		];
+
+		foreach($navlinks_array as $name)
+		{
+			$this->template->assign_block_vars('navlinks', [
+				'FORUM_NAME'	=> $name['FORUM_NAME'],
+				'U_VIEW_FORUM'	=> $name['U_VIEW_FORUM'],
+			]);
+		}
 	}
 }

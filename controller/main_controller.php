@@ -19,6 +19,7 @@ class main_controller
 	protected $php_ext;
 	protected $blog;
 	protected $category;
+	protected $functions;
 
 	/**
 	* Constructor
@@ -31,7 +32,8 @@ class main_controller
 		$phpbb_root_path,
 		$php_ext,
 		$blog,
-		$category)
+		$category,
+		$functions)
 	{
 		$this->user		= $user;
 		$this->config	= $config;
@@ -39,8 +41,9 @@ class main_controller
 		$this->request	= $request;
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->php_ext			= $php_ext;
-		$this->blog		= $blog;
-		$this->category	= $category;
+		$this->blog				= $blog;
+		$this->category			= $category;
+		$this->functions		= $functions;
 	}
 
 	public function blog()
@@ -85,6 +88,25 @@ class main_controller
 		$this->blog->display($blog_id);
 		// Generate the page template
 		return $this->helper->render('blog.html');
+	}
+
+	public function comment($blog_id)
+	{
+		$action = $this->request->variable('action', '');
+		$comment_id = (int) $this->request->variable('comment_id', 0);
+
+		switch($action)
+		{
+			case 'edit':
+				$this->functions->comment_edit($blog_id, $comment_id);
+				// Generate the page template
+				return $this->helper->render('comment_edit.html', $this->user->lang('BLOG_COMMENT_EDIT'));
+			break;
+
+			case 'delete':
+				$this->functions->comment_delete($blog_id, $comment_id);
+			break;
+		}
 	}
 
 	public function category($cat_id)

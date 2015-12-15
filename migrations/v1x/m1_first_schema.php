@@ -34,6 +34,7 @@ class m1_first_schema extends \phpbb\db\migration\migration
 						'blog_edit_reason'	=> array('VCHAR', null),
 						'blog_edit_count'	=> array('USINT', 0),
 						'blog_edit_locked'	=> array('TINT:1', 0),
+						'blog_description'	=> array('VCHAR:175', ''),
 					),
 					'PRIMARY_KEY'	=> 'blog_id',
 				),
@@ -52,15 +53,26 @@ class m1_first_schema extends \phpbb\db\migration\migration
 				),
 				$this->table_prefix . 'ub_comments'	=> array(
 					'COLUMNS'	=> array(
-						'id'			=> array('UINT:11', null, 'auto_increment'),
+						'comment_id'		=> array('UINT:10', null, 'auto_increment'),
+						'comment_text'		=> array('TEXT', null),
+						'blog_id'			=> array('UINT:10', null),
+						'poster_id'			=> array('UINT', 0),
+						'post_time'			=> array('INT:11', 0),
+						'bbcode_uid'		=> array('VCHAR:9', null),
+						'bbcode_bitfield'	=> array('VCHAR', null),
+						'bbcode_options'	=> array('USINT', null),
 					),
-					'PRIMARY_KEY'	=> 'id',
+					'PRIMARY_KEY'	=> 'comment_id',
 				),
-				$this->table_prefix . 'ub_tags' => array(
+				$this->table_prefix . 'ub_rating' => array (
 					'COLUMNS'	=> array(
-						'tag_id'		=> array('UINT:11', null, 'auto_increment'),
+						'rating_id'			=> array('UINT:10', null, 'auto_increment'),
+						'blog_id'			=> array('UINT:10', null),
+						'user_id'			=> array('UINT:10', null),
+						'rating'			=> array('TINT:5', null),
+						'rate_time'			=> array('INT:11', 0),
 					),
-					'PRIMARY_KEY'	=> 'tag_id',
+					'PRIMARY_KEY'	=> 'rating_id',
 				),
 			),
 		);
@@ -73,7 +85,7 @@ class m1_first_schema extends \phpbb\db\migration\migration
 				$this->table_prefix . 'ub_blogs',
 				$this->table_prefix . 'ub_cats',
 				$this->table_prefix . 'ub_comments',
-				$this->table_prefix . 'ub_tags',
+				$this->table_prefix . 'ub_rating',
 			),
 		);
 	}

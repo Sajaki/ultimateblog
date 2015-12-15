@@ -15,6 +15,12 @@
 	width: 78%;
 }
 
+.blog-categories {
+	clear: left;
+	width: 78%;
+	display: inline-block;
+}
+
 .blog-panel {
 	background-color: transparent;
 }
@@ -23,7 +29,7 @@
 	border-bottom: 1px solid #e4e4e4;
 }
 
-.blog-categories {
+.blog-sidebar {
     width: 20%;
     float: right;
 	clear: right;
@@ -31,7 +37,7 @@
 	font-size: 1.1em;
 }
 
-.blog-categories h3 {
+.blog-sidebar h3 {
 	color: black;
     border-bottom: 1px inset grey;
 }
@@ -106,5 +112,39 @@
 	display: inline-block;
 }
 
+.blog-comment-avatar {
+	display: inline-block;
+	clear: left;
+	float: left;
+	border-right: 1px solid grey;
+	border-top: 1px solid #e4e4e4;
+	margin: 3px;
+	width: 14%;
+	overflow: hidden;
+	margin-right: 5px;
+	text-align: center;
+}
 
+.blog-comment-avatar img {
+	margin: 3px;
+}
 
+.blog-comment-author {
+	display: inline-block;
+	border-bottom: 1px solid grey;
+	font-size: 1.1em;
+	margin-bottom: 4px;
+}
+
+.blog-comment-text {
+	display: inline-block;
+	width: 84%;
+	float: left;
+}
+
+.blog-comment-add {
+	display: block;
+	clear: left;
+	border-top: 1px solid transparent;
+	padding-top: 10px;
+}

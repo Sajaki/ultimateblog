@@ -23,8 +23,11 @@ class listener implements EventSubscriberInterface
 	protected $auth;
 	protected $helper;
 	protected $request;
+	protected $path_helper;
 	protected $phpbb_root_path;
 	protected $php_ext;
+	protected $ub_blogs_table;
+	protected $ub_cats_table;
 
 	/**
 	* Constructor
@@ -37,8 +40,11 @@ class listener implements EventSubscriberInterface
 		\phpbb\auth\auth $auth,
 		\phpbb\controller\helper $helper,
 		\phpbb\request\request $request,
+		\phpbb\path_helper $path_helper,
 		$phpbb_root_path,
-		$php_ext)
+		$php_ext,
+		$ub_blogs_table,
+		$ub_cats_table)
 	{
 		$this->user		= $user;
 		$this->template	= $template;
@@ -47,8 +53,11 @@ class listener implements EventSubscriberInterface
 		$this->auth		= $auth;
 		$this->helper	= $helper;
 		$this->request	= $request;
+		$this->path_helper		= $path_helper;
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->php_ext			= $php_ext;
+		$this->ub_blogs_table	= $ub_blogs_table;
+		$this->ub_cats_table	= $ub_cats_table;
 	}
 
 	static public function getSubscribedEvents()
@@ -86,15 +95,83 @@ class listener implements EventSubscriberInterface
 	{
 		if ($event['on_page'][1] == 'app')
 		{
-			if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/blog') === 0)
+			// Editing a comment
+			if ((strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/blog/') === 0) && (strrpos($event['row']['session_page'], '/comment')))
 			{
-				$event['location'] = $this->user->lang('BLOG_VIEWONLINE');
+				$path = parse_url($event['row']['session_page'], PHP_URL_PATH);
+				$path_fragments = explode('/', $path);
+				$blog_id = (int) $path_fragments[2];
+				$sql = 'SELECT blog_subject
+						FROM ' . $this->ub_blogs_table . '
+						WHERE blog_id = ' . $blog_id;
+				$result = $this->db->sql_query($sql);
+				$blog_subject = $this->db->sql_fetchfield('blog_subject');
+				$this->db->sql_freeresult($result);
+
+				$event['location'] = $this->user->lang('VIEWONLINE_BLOG_COMMENT_EDIT', $blog_subject);
+				$event['location_url'] = $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $blog_id]);
+			}
+			// Viewing a category
+			else if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/blog/categories/') === 0)
+			{
+				$path = parse_url($event['row']['session_page'], PHP_URL_PATH);
+				$path_fragments = explode('/', $path);
+				$cat_id = (int) $path_fragments[3];
+
+				// Viewing all categories
+				if (!$cat_id)
+				{
+					$event['location'] = $this->user->lang['VIEWONLINE_BLOG_CATEGORIES'];
+					$event['location_url'] = $this->helper->route('posey_ultimateblog_categories');
+				}
+				// Viewing specific category
+				else
+				{
+					$sql = 'SELECT cat_name
+							FROM ' . $this->ub_cats_table . '
+							WHERE cat_id = ' . $cat_id;
+					$result = $this->db->sql_query($sql);
+					$cat_name = $this->db->sql_fetchfield('cat_name');
+					$this->db->sql_freeresult($result);
+
+					$event['location'] = $this->user->lang('VIEWONLINE_BLOG_CATEGORY', $cat_name);
+					$event['location_url'] = $this->helper->route('posey_ultimateblog_category', ['cat_id' => $cat_id]);
+				}
+			}
+			// Viewing archive
+			else if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/blog/archive') === 0)
+			{
+				$path = parse_url($event['row']['session_page'], PHP_URL_PATH);
+				$path_fragments = explode('/', $path);
+				$date = explode('-', $path_fragments[3]);
+				$year = (int) $date[0];
+				$month = (int) $date[1];
+
+				$event['location'] = $this->user->lang('VIEWONLINE_BLOG_ARCHIVE', $month . '-' . $year);
+				$event['location_url'] = $this->helper->route('posey_ultimateblog_archive', ['year' => $year, 'month' => $month]);
+			}
+			// Reading a specific blog
+			else if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/blog/') === 0)
+			{
+				$path = parse_url($event['row']['session_page'], PHP_URL_PATH);
+				$path_fragments = explode('/', $path);
+				$blog_id = (int) $path_fragments[2];
+
+				$sql = 'SELECT blog_subject
+						FROM ' . $this->ub_blogs_table . '
+						WHERE blog_id = ' . $blog_id;
+				$result = $this->db->sql_query($sql);
+				$blog_subject = $this->db->sql_fetchfield('blog_subject');
+				$this->db->sql_freeresult($result);
+
+				$event['location'] = $this->user->lang('VIEWONLINE_BLOG', $blog_subject);
 				$event['location_url'] = $this->helper->route('posey_ultimateblog_blog');
 			}
-			else if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/categor') === 0)
+			// 'Just' viewing blogs
+			else if (strrpos($event['row']['session_page'], 'app.' . $this->php_ext . '/blog') === 0)
 			{
-				$event['location'] = $this->user->lang('CAT_VIEWONLINE');
-				$event['location_url'] = $this->helper->route('posey_ultimateblog_categories');
+				$event['location'] = $this->user->lang['VIEWONLINE_BLOGS'];
+				$event['location_url'] = $this->helper->route('posey_ultimateblog_blog');
 			}
 		}
 	}

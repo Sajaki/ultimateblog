@@ -30,6 +30,7 @@ services:
            - %core.php_ext%
            - @posey.ultimateblog.core.blog
            - @posey.ultimateblog.core.category
+           - @posey.ultimateblog.core.functions
 
     posey.ultimateblog.listener:
         class: posey\ultimateblog\event\listener
@@ -41,8 +42,11 @@ services:
            - @auth
            - @controller.helper
            - @request
+           - @path_helper
            - %core.root_path%
            - %core.php_ext%
+           - %posey.ultimateblog.table.ub.blogs%
+           - %posey.ultimateblog.table.ub.cats%
         tags:
            - { name: event.listener }
 
@@ -63,6 +67,7 @@ services:
            - %posey.ultimateblog.table.ub.blogs%
            - %posey.ultimateblog.table.ub.cats%
            - %posey.ultimateblog.table.ub.comments%
+           - %posey.ultimateblog.table.ub.tags%
            - @posey.ultimateblog.core.functions
 
     posey.ultimateblog.core.category:
@@ -90,5 +95,12 @@ services:
             - @dbal.conn
             - @controller.helper
             - @user
+            - @config
+            - @auth
+            - @log
+            - @request
+            - %core.root_path%
+            - %core.php_ext%
             - %posey.ultimateblog.table.ub.blogs%
             - %posey.ultimateblog.table.ub.cats%
+            - %posey.ultimateblog.table.ub.comments%

@@ -230,7 +230,11 @@ class category
 			[
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_categories'),
 				'FORUM_NAME'		=> $this->user->lang('CATEGORIES'),
-			]
+			],
+			[
+				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_category', ['cat_id' => (int) $cat_id]),
+				'FORUM_NAME'		=> $cat_name,
+			],
 		];
 
 		foreach($navlinks_array as $name)

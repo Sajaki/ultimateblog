@@ -25,6 +25,7 @@ class blog
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
 	protected $ub_comments_table;
+	protected $ub_tags_table;
 	protected $functions;
 
 	/**
@@ -45,6 +46,7 @@ class blog
 		$ub_blogs_table,
 		$ub_cats_table,
 		$ub_comments_table,
+		$ub_tags_table,
 		$functions)
 	{
 		$this->user		= $user;
@@ -61,6 +63,7 @@ class blog
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
 		$this->ub_comments_table = $ub_comments_table;
+		$this->ub_tags_table	= $ub_tags_table;
 		$this->functions		= $functions;
 	}
 
@@ -157,10 +160,15 @@ class blog
 				// Invalid form key
 				trigger_error($this->user->lang['FORM_INVALID'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
 			}
+			else if ($this->request->variable('category', 0) == '')
+			{
+				// No category selected
+				trigger_error($this->user->lang['CAT_INVALID'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog', ['action' => 'edit']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
 			else
 			{
 				// Generate text for storage
-				$text = utf8_normalize_nfc($this->request->variable('message', '', true));
+				$text = $this->request->variable('message', '', true);
 				$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 				$allow_bbcode = $this->request->variable('blog_bbcode', 0) == 1 ? true : false;
 				$allow_smilies = $this->request->variable('blog_smilies', 0) == 1 ? true : false;
@@ -180,6 +188,7 @@ class blog
 					'bbcode_bitfield'		=> $bitfield,
 					'blog_edit_locked'		=> $this->request->variable('edit_locked', 0),
 					'enable_comments'		=> $this->request->variable('enable_comments', 0),
+					'blog_description'		=> $this->request->variable('blog_description', ''),
 				];
 
 				// Insert the blog
@@ -188,7 +197,7 @@ class blog
 				$blog_id = (int) $this->db->sql_nextid();
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_ADDED', false, array($blow_row['blog_subject']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_ADDED', false, array($blog_row['blog_subject']));
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_ADDED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $blog_id]) . '">' . $this->user->lang['BLOG_VIEW'] . ' &raquo;</a>');
@@ -225,7 +234,7 @@ class blog
 				$edit_locked = $this->request->variable('edit_locked', 0) == 1 ? true : false;
 				$enable_comments = $this->request->variable('enable_comments', 0) == 1 ? true : false;
 
-				$blog_text = utf8_normalize_nfc($this->request->variable('message', '', true));
+				$blog_text = $this->request->variable('message', '', true);
 				$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 				$allow_bbcode = $this->request->variable('blog_bbcode', 0) == 1 ? true : false;
 				$allow_smilies = $this->request->variable('blog_smilies', 0) == 1 ? true : false;
@@ -234,6 +243,7 @@ class blog
 				$blog_preview = generate_text_for_display($blog_text, $uid, $bitfield, $options);
 
 				$this->template->assign_var('MESSAGE', $this->request->variable('message', '', true));
+				$this->template->assign_var('DESCRIPTION', $this->request->variable('blog_description', '', true));
 		}
 
 		// Grab all categories
@@ -242,7 +252,7 @@ class blog
 		$result = $this->db->sql_query($sql);
 
 		$selected = $blog_preview ? '' : ' selected';
-		$categories = '<option value="0" required disabled' . $selected . '>' . $this->user->lang['BLOG_CHOOSE_CAT'] . '</option>';
+		$categories = '<option value="" required disabled' . $selected . '>' . $this->user->lang['BLOG_CHOOSE_CAT'] . '</option>';
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -262,6 +272,7 @@ class blog
 				'FORUM_NAME'		=> $this->user->lang('BLOG'),
 			],
 			[
+				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
 				'FORUM_NAME'		=> $this->user->lang['BLOG_ADD'],
 			]
 		];
@@ -316,10 +327,15 @@ class blog
 				// Invalid form key
 				trigger_error($this->user->lang['FORM_INVALID'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog', ['action' => 'edit']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
 			}
+			else if ($this->request->variable('category', 0) == '')
+			{
+				// No category selected
+				trigger_error($this->user->lang['CAT_INVALID'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog', ['action' => 'edit']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
 			else
 			{
 				// Generate text for storage
-				$text = utf8_normalize_nfc($this->request->variable('message', '', true));
+				$text = $this->request->variable('message', '', true);
 				$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 				$allow_bbcode = $this->request->variable('blog_bbcode', 0) == 1 ? true : false;
 				$allow_smilies = $this->request->variable('blog_smilies', 0) == 1 ? true : false;
@@ -328,7 +344,7 @@ class blog
 
 				$blog_row = [
 					'cat_id'				=> (int) $this->request->variable('category', 1),
-					'blog_subject'			=> ucfirst(utf8_normalize_nfc($this->request->variable('subject', '', true))),
+					'blog_subject'			=> ucfirst($this->request->variable('subject', '', true)),
 					'blog_text'				=> $text,
 					'enable_bbcode'	 		=> $allow_bbcode ? 1 : 0,
 					'enable_smilies'		=> $allow_smilies ? 1 : 0,
@@ -341,14 +357,15 @@ class blog
 					'blog_edit_count'		=> (int) ($blog['blog_edit_count'] + 1),
 					'blog_edit_locked'		=> $this->request->variable('edit_locked', 0),
 					'enable_comments'		=> $this->request->variable('enable_comments', 0),
+					'blog_description'		=> $this->request->variable('blog_description', '', true),
 				];
 
 				// Update the blog
-				$sql = 'UPDATE ' . $this->ub_blogs_table . ' SET ' . $this->db->sql_build_array('UPDATE', $blog_row) . ' WHERE blog_id =' . (int) $blog_id;
+				$sql = 'UPDATE ' . $this->ub_blogs_table . ' SET ' . $this->db->sql_build_array('UPDATE', $blog_row) . ' WHERE blog_id = ' . (int) $blog_id;
 				$this->db->sql_query($sql);
 
 				// Add it to the log
-				$this->log->add('user', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_EDITED', $blow_row['blog_subject']);
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_EDITED', time(), array($blog_row['blog_subject']));
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_EDITED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">' . $this->user->lang['BLOG_VIEW'] . ' &raquo;</a>');
@@ -380,7 +397,7 @@ class blog
 		$form_enctype = '';
 
 		// Check if blog exists
-		if ($blog == '')
+		if (!$blog)
 		{
 			trigger_error($this->user->lang['BLOG_NOT_EXIST'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog') . '">&laquo; ' . $this->user->lang['BLOG_BACK'] . '</a>');
 		}
@@ -391,7 +408,7 @@ class blog
 			trigger_error($this->user->lang['AUTH_BLOG_EDIT'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BLOG_BACK'] . '</a>');
 		}
 
-		if (($this->auth->acl_get('u_blog_edit') && $blog['user_id'] != $this->user->data['user_id']) && !$this->auth->acl_get('m_blog_edit'))
+		if (($this->auth->acl_get('u_blog_edit') && $blog['poster_id'] != $this->user->data['user_id']) && !$this->auth->acl_get('m_blog_edit'))
 		{
 			trigger_error($this->user->lang['AUTH_BLOG_EDIT_ELSE'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BLOG_BACK'] . '</a>');
 		}
@@ -428,7 +445,7 @@ class blog
 		$blog_preview = '';
 		if ($this->request->is_set_post('preview'))
 		{
-				$blog_text = utf8_normalize_nfc($this->request->variable('message', '', true));
+				$blog_text = $this->request->variable('message', '', true);
 				$uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
 				$allow_bbcode = $this->request->variable('blog_bbcode', 0) == 1 ? true : false;
 				$allow_smilies = $this->request->variable('blog_smilies', 0) == 1 ? true : false;
@@ -460,6 +477,7 @@ class blog
 		$this->template->assign_vars([
 			'BLOG_PREVIEW'		=> $blog_preview,
 			'CATEGORIES'		=> $categories,
+			'DESCRIPTION'		=> $blog_preview ? $this->request->variable('blog_description', '', true) : $blog['blog_description'],
 			'MESSAGE'			=> $blog_preview ? $this->request->variable('message', '', true) : $blog['blog_text'],
 			'SUBJECT'			=> $blog['blog_subject'],
 
@@ -565,6 +583,14 @@ class blog
 		$blog = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
+		// Get category name
+		$sql = 'SELECT cat_name
+				FROM ' . $this->ub_cats_table . '
+				WHERE cat_id = ' . (int) $blog['cat_id'];
+		$result = $this->db->sql_query($sql);
+		$cat_name = $this->db->sql_fetchfield('cat_name');
+		$this->db->sql_freeresult($result);
+
 		// Get user who last edited
 		$sql = 'SELECT user_id, username, user_colour
 				FROM ' . USERS_TABLE . '
@@ -582,10 +608,11 @@ class blog
 		// Get Sidebar
 		$this->functions->sidebar();
 
-		$this->template->assign_vars(array(
+		$this->template->assign_vars([
 			'BLOG_ID'			=> $blog['blog_id'],
 			'BLOG_SUBJECT'		=> $blog['blog_subject'],
 			'BLOG_TEXT'			=> generate_text_for_display($blog['blog_text'], $blog['bbcode_uid'], $blog['bbcode_bitfield'], $bbcode_options),
+			'BLOG_DESCRIPTION'	=> $blog['blog_description'],
 			'BLOG_POSTER'		=> get_username_string('full', $blog['user_id'], $blog['username'], $blog['user_colour']),
 			'BLOG_POST_TIME'	=> $this->user->format_date($blog['post_time'], 'F jS, Y'),
 			'BLOG_AVATAR'		=> phpbb_get_user_avatar($blog),
@@ -594,60 +621,106 @@ class blog
 			'EDIT_REASON'	=> $blog['blog_edit_reason'],
 			'EDIT_COUNT'	=> $this->user->lang('BLOG_EDIT_COUNT', (int) $blog['blog_edit_count']),
 
-			'CATEGORIES'	=> $categories,
 			'CAT_NAME'		=> $cat_name,
 			'CAT_LINK'		=> $this->helper->route('posey_ultimateblog_category', ['cat_id' => (int) $blog['cat_id']]),
 
 			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
 			'S_BLOG_CAN_DELETE'	=> $this->auth->acl_get('m_blog_delete'),
 			'S_BLOG_CAN_EDIT'	=> (($this->auth->acl_get('u_blog_edit') && $this->user->data['user_id'] == $blog['user_id']) || $this->auth->acl_get('m_blog_edit')) ? true : false,
+			'S_COMMENT_CAN_ADD'	=> $this->auth->acl_get('u_blog_comment_make'),
+			'S_COMMENT_CAN_DEL'	=> $this->auth->acl_get('m_blog_comment_delete'),
 			'S_EDITED'			=> $blog['blog_edit_count'] > 0 ? true : false,
-			'S_EDIT_LOCKED'		=> $blog['edit_locked'] == 1 ? true : false,
+			'S_EDIT_LOCKED'		=> $blog['blog_edit_locked'] == 1 ? true : false,
 			'S_ENABLE_COMMENTS'	=> $blog['enable_comments'] == 1 ? true : false,
 
 			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
 			'U_BLOG_DELETE'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'delete', 'blog_id' => (int) $blog['blog_id']]),
 			'U_BLOG_EDIT'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'edit', 'blog_id' => (int) $blog['blog_id']]),
-		));
-/*
+		]);
+
 		// Grab comments for this blog
-		$sql_array = array(
+		$sql_array = [
 			'SELECT'	=> 'c.*, u.user_id, u.username, u.user_colour, u.user_avatar, u.user_avatar_type, u.user_avatar_height, u.user_avatar_width',
 
-			'FROM'		=> array(
-				$this->ub_comments_table => 'c',
-			),
+			'FROM'		=> [$this->ub_comments_table => 'c'],
 
-			'LEFT_JOIN' => array(
-				array(
-					'FROM'	=> array(USERS_TABLE => 'u'),
+			'LEFT_JOIN' => [
+				[
+					'FROM'	=> [USERS_TABLE => 'u'],
 					'ON'	=> 'c.poster_id = u.user_id',
-				)
-			),
+				]
+			],
 
 			'WHERE'		=> 'c.blog_id = ' . (int) $blog_id,
 
 			'ORDER_BY'	=> 'c.post_time ASC',
-		);
+		];
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		$result = $this->db->sql_query($sql);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			// Check BBCode Options
-			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
-								(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
-								(($row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
-
-			$this->template->assign_block_vars('comments', array(
+			$this->template->assign_block_vars('comments', [
 				'ID'		=> $row['comment_id'],
-				'SUBJECT'	=> $row['comment_subject'],
-				'TEXT'		=> generate_text_for_display($row['comment_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $bbcode_options),
+				'TEXT'		=> generate_text_for_display($row['comment_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $row['bbcode_options']),
+				'POST_TIME'	=> $this->user->format_date($row['post_time']),
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
 				'AVATAR'	=> phpbb_get_user_avatar($row),
-			));
+
+				'U_COMMENT_DELETE'	=> $this->helper->route('posey_ultimateblog_comment', ['blog_id' => (int) $blog_id, 'comment_id' => (int) $row['comment_id'], 'action' => 'delete']),
+				'U_COMMENT_EDIT'	=> $this->helper->route('posey_ultimateblog_comment', ['blog_id' => (int) $blog_id, 'comment_id' => (int) $row['comment_id'], 'action' => 'edit']),
+			]);
 		}
-		$this->db->sql_freeresult($result); */
+		$this->db->sql_freeresult($result);
+
+		add_form_key('submit_comment');
+
+		// Add a comment
+		if ($this->request->is_set_post('submit_comment'))
+		{
+			if (!$this->auth->acl_get('u_blog_comment_make'))
+			{
+				// Not authorised to comment (permissions)
+				trigger_error($this->user->lang['AUTH_BLOG_COMMENT_ADD'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+			else if ($blog['enable_comments'] == 0)
+			{
+				// Comments have been disabled
+				trigger_error($this->user->lang['BLOG_COMMENTS'] . ' ' . $this->user->lang['BLOG_COMMENTS_DISABLED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+			else if (!check_form_key('submit_comment'))
+			{
+				// Invalid form key
+				trigger_error($this->user->lang['FORM_INVALID'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+			else
+			{
+				$comment_text = $this->request->variable('comment_text', '', true);
+				$uid = $bitfield = $options = '';
+				$allow_bbcode = $this->config['allow_bbcode'];
+				$allow_smilies = $this->config['allow_smilies'];
+				$allow_urls = $this->config['allow_post_links'];
+				generate_text_for_storage($comment_text, $uid, $bitfield, $options, $allow_bbcode, $allow_urls, $allow_smilies);
+
+				$sql_ary = [
+					'comment_text'		=> $comment_text,
+					'blog_id'			=> $blog_id,
+					'poster_id'			=> $this->user->data['user_id'],
+					'post_time'			=> time(),
+					'bbcode_uid'		=> $uid,
+					'bbcode_bitfield'	=> $bitfield,
+					'bbcode_options'	=> $options,
+				];
+
+				// Insert the comment
+				$sql = 'INSERT INTO ' . $this->ub_comments_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
+				$this->db->sql_query($sql);
+				$comment_id = $this->db->sql_nextid();
+
+				// Success! Redirect to the comment
+				redirect($this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '#c' . $comment_id);
+			}
+		}
 
 		// Assign breadcrumb template vars
 		$navlinks_array = [
@@ -656,7 +729,7 @@ class blog
 				'FORUM_NAME'		=> $this->user->lang('BLOG'),
 			],
 			[
-				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog['blog_id']]),
+				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]),
 				'FORUM_NAME'		=> $blog['blog_subject'],
 			]
 		];

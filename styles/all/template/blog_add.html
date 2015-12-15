@@ -37,7 +37,7 @@
 							<a href="#" onclick="insert_text('{smiley.A_SMILEY_CODE}', true); return false;"><img src="{smiley.SMILEY_IMG}" width="{smiley.SMILEY_WIDTH}" height="{smiley.SMILEY_HEIGHT}" alt="{smiley.SMILEY_CODE}" title="{smiley.SMILEY_DESC}" /></a>
 						<!-- END smiley -->
 					<!-- ENDIF -->
-					<!-- IF S_SHOW_SMILEY_LINK and S_SMILIES_ALLOWED-->
+					<!-- IF S_SHOW_SMILEY_LINK and S_SMILIES_ALLOWED -->
 						<br><a href="{U_MORE_SMILIES}" onclick="popup(this.href, 300, 350, '_phpbbsmilies'); return false;">{L_MORE_SMILIES}</a>
 					<!-- ENDIF -->
 
@@ -63,10 +63,14 @@
 				<div id="message-box">
 					<textarea name="message" id="message" rows="15" cols="76" tabindex="4" onselect="storeCaret(this);" onclick="storeCaret(this);" onkeyup="storeCaret(this);" onfocus="initInsertions();" class="inputbox">{MESSAGE}</textarea>
 				</div>
-				<!-- IF S_BLOG_EDIT -->
+
+				<dl><dt>Blog Description:</dt>
+					<dd>&nbsp;<textarea name="blog_description" style="width: 76%;" rows="5" minlength="130" maxlength="160" placeholder="Enter your blog description here. It must be between and 130 and 160 characters.">{DESCRIPTION}</textarea>
+				</dd></dl>
+					<!-- IF S_BLOG_EDIT -->
 					<dl style="clear: left;">
 						<dt><label for="edit_reason">{L_BLOG_EDIT_REASON}{L_COLON}</label></dt>
-						<dd><input type="text" name="edit_reason" id="edit_reason" size="45" maxlength="124" tabindex="2" class="inputbox autowidth" /></dd>
+						<dd>&nbsp;<input type="text" name="edit_reason" id="edit_reason" size="45" maxlength="124" tabindex="2" class="inputbox autowidth" /></dd>
 					</dl>
 				<!-- ENDIF -->
 
