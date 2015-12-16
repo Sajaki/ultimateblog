@@ -201,7 +201,7 @@ class functions
 			]);
 		}
 		
-		// Count categories blogs
+		// Count archives
 		$sql = 'SELECT *
 			FROM ' . $this->ub_blogs_table . '
 			WHERE MONTH(FROM_UNIXTIME(post_time)) = ' . (int) $month . '
