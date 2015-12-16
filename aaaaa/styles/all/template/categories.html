@@ -1,0 +1,39 @@
+<!-- INCLUDE overall_header.html -->
+<!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
+<h1 class="blog-name">{L_BLOG}</h1>
+<h2 class="blog-title">{L_BLOG_CATS}</h2>
+
+<!-- INCLUDE sidebar.html -->
+<div class="forabg blog-categories">
+	<div class="inner">
+
+		<ul class="topiclist">
+			<li class="header">
+				<dl class="icon">
+					<dt>
+						<div class="list-inner">
+							{L_CATEGORIES}
+						</div>
+					</dt>
+					<dd class="topics">{L_BLOG_POSTS}</dd>
+				</dl>
+			</li>
+		</ul>
+		<ul class="topiclist forums">
+			<!-- BEGIN categories -->
+				<li class="row">
+					<dl class="icon forum_read">
+						<dt>
+							<div class="list-inner">
+								<a href="{categories.LINK}" alt="" class="forumtitle">{categories.NAME}</a><br>{categories.DESC}
+							</div>
+						</dt>
+						<dd class="topics">{categories.COUNT}</dd>
+					</dl>
+				</li>
+			<!-- END categories -->
+		</ul>
+	</div>
+</div>
+<br>
+<!-- INCLUDE overall_footer.html -->

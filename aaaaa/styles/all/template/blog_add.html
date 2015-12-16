@@ -1,0 +1,91 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1 class="blog-name">{L_BLOG}</h1>
+<h2 class="blog-title"><!-- IF S_BLOG_EDIT -->{L_BLOG_EDIT}<!-- ELSE -->{L_BLOG_NEW}<!-- ENDIF --></h2>
+
+<!-- IF BLOG_PREVIEW != '' -->
+	<div class="panel blog-panel">
+		<div class="inner">
+			<div class="blog">
+				<h3>{L_PREVIEW}</h3>
+				{BLOG_PREVIEW}
+			</div>
+		</div>
+	</div>
+<!-- ENDIF -->
+
+<div class="panel bg2">
+	<div class="inner">
+		<h3><!-- IF not S_BLOG_EDIT -->{L_BLOG_ADD}<!-- ELSEIF S_BLOG_EDIT -->{L_BLOG_EDIT}<!-- ENDIF --></h3>
+
+		<form method="post" id="postform" action="{U_ACTION}"{S_FORM_ENCTYPE}>
+			<fieldset class="fields1">
+				<dl style="clear: left;">
+					<dt><label for="subject">{L_SUBJECT}{L_COLON}</label></dt>
+					<dd><input type="text" name="subject" id="subject" size="45" maxlength="124" tabindex="2" value="{SUBJECT}" class="inputbox autowidth" required /></dd>
+				</dl>
+				<dl style="clear: left;">
+					<dt><label for="category">{L_CATEGORY}{L_COLON}</label></dt>
+					<dd><select name="category" required>{CATEGORIES}</select></dd>
+				</dl>
+				<!-- INCLUDE posting_buttons.html -->
+
+				<div id="smiley-box">
+					<!-- IF S_SMILIES_STATUS and .smiley -->
+						<strong>{L_SMILIES}</strong><br>
+						<!-- BEGIN smiley -->
+							<a href="#" onclick="insert_text('{smiley.A_SMILEY_CODE}', true); return false;"><img src="{smiley.SMILEY_IMG}" width="{smiley.SMILEY_WIDTH}" height="{smiley.SMILEY_HEIGHT}" alt="{smiley.SMILEY_CODE}" title="{smiley.SMILEY_DESC}" /></a>
+						<!-- END smiley -->
+					<!-- ENDIF -->
+					<!-- IF S_SHOW_SMILEY_LINK and S_SMILIES_ALLOWED -->
+						<br><a href="{U_MORE_SMILIES}" onclick="popup(this.href, 300, 350, '_phpbbsmilies'); return false;">{L_MORE_SMILIES}</a>
+					<!-- ENDIF -->
+
+					<!-- IF S_BBCODE_STATUS -->
+						<!-- IF .smiley --><hr><!-- ENDIF -->
+						{S_BBCODE_ALLOWED}<br>
+						<!-- IF S_BBCODE_ALLOWED -->
+							{S_BBCODE_IMG}<br>
+							{S_BBCODE_FLASH}<br>
+							{S_BBCODE_URL}<br>
+
+						<!-- ENDIF -->
+						{S_SMILIES_ALLOWED}
+					<!-- ENDIF -->
+					<hr>
+					<input type="checkbox" class="radio" value="1" name="blog_bbcode"<!-- IF S_BLOG_BBCODE --> checked="checked"<!-- ENDIF --> /> {L_PARSE_BBCODE}<br>
+					<input type="checkbox" class="radio" value="1" name="blog_smilies"<!-- IF S_BLOG_SMILIES --> checked="checked"<!-- ENDIF --> /> {L_PARSE_SMILIES}<br>
+					<input type="checkbox" class="radio" value="1" name="blog_urls"<!-- IF S_BLOG_URLS --> checked="checked"<!-- ENDIF --> /> {L_PARSE_URLS}<br>
+					<input type="checkbox" class="radio" value="1" name="edit_locked"<!-- IF S_EDIT_LOCKED --> checked="checked"<!-- ENDIF --> /> {L_LOCK_EDIT}<br>
+					<input type="checkbox" class="radio" value="1" name="enable_comments"<!-- IF S_ENABLE_COMMENTS --> checked="checked"<!-- ENDIF --> /> {L_ENABLE_COMMENTS}
+				</div>
+
+				<div id="message-box">
+					<textarea name="message" id="message" rows="15" cols="76" tabindex="4" onselect="storeCaret(this);" onclick="storeCaret(this);" onkeyup="storeCaret(this);" onfocus="initInsertions();" class="inputbox">{MESSAGE}</textarea>
+				</div>
+
+				<dl><dt>Blog Description:</dt>
+					<dd>&nbsp;<textarea name="blog_description" style="width: 76%;" rows="5" minlength="130" maxlength="160" placeholder="Enter your blog description here. It must be between and 130 and 160 characters.">{DESCRIPTION}</textarea>
+				</dd></dl>
+					<!-- IF S_BLOG_EDIT -->
+					<dl style="clear: left;">
+						<dt><label for="edit_reason">{L_BLOG_EDIT_REASON}{L_COLON}</label></dt>
+						<dd>&nbsp;<input type="text" name="edit_reason" id="edit_reason" size="45" maxlength="124" tabindex="2" class="inputbox autowidth" /></dd>
+					</dl>
+				<!-- ENDIF -->
+
+			</fieldset>
+
+			<div class="panel bg3">
+				<div class="inner">
+					<fieldset class="submit-buttons">
+						{S_FORM_TOKEN}
+						<input type="submit" tabindex="5" name="preview" value="{L_PREVIEW}" class="button1" />&nbsp;
+						<input type="submit" accesskey="s" tabindex="6" name="submit" value="{L_SUBMIT}" class="button1 default-submit-action" />&nbsp;
+					</fieldset>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<!-- INCLUDE overall_footer.html -->
