@@ -69,6 +69,8 @@ class blog
 
 	function latest()
 	{
+		$start = $this->request->variable('start', 0);
+
 		// Get latest blogs
 		$sql_array = [
 			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour',
@@ -88,7 +90,7 @@ class blog
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query_limit($sql, $this->config['ub_latest_blogs']);
+		$result = $this->db->sql_query_limit($sql, $this->config['ub_latest_blogs'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -142,6 +144,22 @@ class blog
 			'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog'),
 			'FORUM_NAME'		=> $this->user->lang('BLOG'),
 		]);
+		
+		// Count blogs
+		$sql = 'SELECT *
+			FROM ' . $this->ub_blogs_table . '
+			ORDER BY blog_id ASC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total); 
+		$total_blog_count = (int) sizeof($row_total); 
+		$this->db->sql_freeresult($result_total);
+		
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_blog'), 'pagination', 'start', $total_blog_count, $this->config['ub_latest_blogs'], $start);
+		
+		$this->template->assign_vars(array(
+			'TOTAL_BLOGS'		=> $this->user->lang('BLOG_BLOG_COUNT', (int) $total_blog_count),
+		));
 	}
 
 	function add()
@@ -557,6 +575,8 @@ class blog
 		{
 			trigger_error($this->user->lang['AUTH_BLOG_VIEW'] . '<br><br>' . $this->user->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->phpbb_root_path}index.{$this->php_ext}") . '">&laquo; ', '</a>'));
 		}
+		
+		$start = $this->request->variable('start', 0);
 
 		// Get blog and poster info
 		$sql_array = [
@@ -657,7 +677,7 @@ class blog
 			'ORDER_BY'	=> 'c.post_time ASC',
 		];
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['ub_latest_blogs'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -747,6 +767,23 @@ class blog
 				'U_VIEW_FORUM'	=> $name['U_VIEW_FORUM'],
 			]);
 		}
+		
+		// Count comments
+		$sql = 'SELECT *
+			FROM ' . $this->ub_comments_table . '
+			WHERE blog_id = ' . (int) $blog_id . '
+			ORDER BY blog_id ASC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total); 
+		$total_comment_count = (int) sizeof($row_total); 
+		$this->db->sql_freeresult($result_total);
+		
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_blog_display', array('blog_id' => $blog_id)), 'pagination', 'start', $total_comment_count, $this->config['ub_latest_blogs'], $start);
+		
+		$this->template->assign_vars(array(
+			'TOTAL_BLOG_COMMENTS'		=> $this->user->lang('BLOG_COMMENTS_COUNT', (int) $total_comment_count),
+		));
 
 		// Generate the page title
 		page_header($blog['blog_subject']);

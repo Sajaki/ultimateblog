@@ -1,6 +1,20 @@
 <!-- INCLUDE overall_header.html -->
 <!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
 <h1 class="blog-name">{L_BLOG}</h1>
+
+<div class="action-bar top">
+	<!-- IF .pagination or TOTAL_CATEGORY_BLOGS -->
+	<div class="pagination">
+		{TOTAL_CATEGORY_BLOGS}
+		<!-- IF .pagination -->
+			<!-- INCLUDE pagination.html -->
+		<!-- ELSE -->
+			&bull; {PAGE_NUMBER}
+		<!-- ENDIF -->
+	</div>
+	<!-- ENDIF -->
+</div>
+
 <h2 class="blog-title">{L_BLOG_FOR_CAT}{L_COLON} {CAT_NAME}</h2>
 <div class="panel blog-panel">
 	<div class="inner">

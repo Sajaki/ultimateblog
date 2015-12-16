@@ -1,30 +1,19 @@
 <!-- INCLUDE overall_header.html -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-<script type="text/javascript">
-$(function(){
-	$('#star-rating').rating(function(vote, event){
-		$.ajax({
-			url: AJAX_BLOG_RATE,
-			type: "GET",
-			data: {rate: vote},
-		});
-	});
-});
-</script>
 
 <!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
 <h1 class="blog-name">{L_BLOG}</h1>
 
- <script>
-		var AJAX_BLOG_RATE = '{U_BLOG_RATE}';
-</script>
-
-<div id="star-rating">
-	<input type="radio" name="example" class="rating" value="1" />
-	<input type="radio" name="example" class="rating" value="2" />
-	<input type="radio" name="example" class="rating" value="3" />
-	<input type="radio" name="example" class="rating" value="4" />
-	<input type="radio" name="example" class="rating" value="5" />
+<div class="action-bar top">
+	<!-- IF .pagination or TOTAL_BLOG_COMMENTS -->
+	<div class="pagination">
+		{TOTAL_BLOG_COMMENTS}
+		<!-- IF .pagination -->
+			<!-- INCLUDE pagination.html -->
+		<!-- ELSE -->
+			&bull; {PAGE_NUMBER}
+		<!-- ENDIF -->
+	</div>
+	<!-- ENDIF -->
 </div>
 
 <div class="panel blog-panel">

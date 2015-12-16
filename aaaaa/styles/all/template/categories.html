@@ -3,6 +3,18 @@
 <h1 class="blog-name">{L_BLOG}</h1>
 <h2 class="blog-title">{L_BLOG_CATS}</h2>
 
+<div class="action-bar top">
+	<!-- IF .pagination or TOTAL_CATS -->
+	<div class="pagination">
+		{TOTAL_CATS}
+		<!-- IF .pagination -->
+			<!-- INCLUDE pagination.html -->
+		<!-- ELSE -->
+			&bull; {PAGE_NUMBER}
+		<!-- ENDIF -->
+	</div>
+	<!-- ENDIF -->
+</div>
 <!-- INCLUDE sidebar.html -->
 <div class="forabg blog-categories">
 	<div class="inner">

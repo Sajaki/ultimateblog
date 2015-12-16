@@ -99,6 +99,7 @@ services:
             - @auth
             - @log
             - @request
+            - @pagination			
             - %core.root_path%
             - %core.php_ext%
             - %posey.ultimateblog.table.ub.blogs%

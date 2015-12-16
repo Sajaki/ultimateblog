@@ -41,13 +41,33 @@ $lang = array_merge($lang, array(
 	'BLOG_ADD'				=> 'Add blog',
 	'BLOG_ADDED'			=> 'Your blog has been succesfully added',
 	'BLOG_ARCHIVE'			=> 'Archive',
+	'BLOG_ARCHIVE_COUNT'	=> array(
+		1 => '%d archive',
+		2 => '%d archives',
+	),
 	'BLOG_ARCHIVE_NO_BLOGS'	=> 'There are no blogs for this period',
 	'BLOG_AUTHOR'			=> 'Author',
 	'BLOG_BACK'				=> 'Back to the blog page',
+	'BLOG_BLOG_COUNT'	=> array(
+		1 => '%d blog',
+		2 => '%d blogs',
+	),
+	'BLOG_BLOG_CATEGORY_COUNT'	=> array(
+		1 => '%d category blog',
+		2 => '%d category blogs',
+	),
 	'BLOG_CATS'				=> 'Blog Categories',
+	'BLOG_CATS_COUNT'	=> array(
+		1 => '%d category',
+		2 => '%d categories',
+	),
 	'BLOG_CHOOSE_CAT'		=> 'Choose a category..',
 	'BLOG_COMMENT'			=> 'Comment',
 	'BLOG_COMMENTS'			=> 'Comments',
+	'BLOG_COMMENTS_COUNT'	=> array(
+		1 => '%d comment',
+		2 => '%d comments',
+	),
 	'BLOG_COMMENT_DELETED'	=> 'The blog comment has been successfully deleted.',
 	'BLOG_COMMENT_DEL_CONFIRM'	=> 'Are you sure you wish to delete this blog comment?',
 	'BLOG_COMMENT_EDIT'			=> 'Edit blog comment',

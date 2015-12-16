@@ -19,6 +19,7 @@ class functions
 	protected $auth;
 	protected $log;
 	protected $request;
+	protected $pagination;
 	protected $phpbb_root_path;
 	protected $php_ext;
 	protected $ub_blogs_table;
@@ -37,6 +38,7 @@ class functions
 		\phpbb\auth\auth $auth,
 		\phpbb\log\log $log,
 		\phpbb\request\request $request,
+		\phpbb\pagination $pagination,
 		$phpbb_root_path,
 		$php_ext,
 		$ub_blogs_table,
@@ -51,6 +53,7 @@ class functions
 		$this->auth		= $auth;
 		$this->log		= $log;
 		$this->request	= $request;
+		$this->pagination		= $pagination;
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->php_ext			= $php_ext;
 		$this->ub_blogs_table	= $ub_blogs_table;
@@ -104,6 +107,8 @@ class functions
 		{
 			trigger_error($this->user->lang['AUTH_BLOG_VIEW'] . '<br><br>' . $this->user->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->phpbb_root_path}index.{$this->php_ext}") . '">&laquo; ', '</a>'));
 		}
+		
+		$start = $this->request->variable('start', 0);
 
 		$sql_array = [
 			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour',
@@ -124,7 +129,7 @@ class functions
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['ub_latest_blogs'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -195,6 +200,24 @@ class functions
 				'U_VIEW_FORUM'	=> $name['U_VIEW_FORUM'],
 			]);
 		}
+		
+		// Count categories blogs
+		$sql = 'SELECT *
+			FROM ' . $this->ub_blogs_table . '
+			WHERE MONTH(FROM_UNIXTIME(post_time)) = ' . (int) $month . '
+			AND YEAR(FROM_UNIXTIME(post_time)) = ' . (int) $year . '
+			ORDER BY post_time DESC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total); 
+		$total_archive = (int) sizeof($row_total); 
+		$this->db->sql_freeresult($result_total);
+		
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_archive', array('year' => $year, 'month' => $month )), 'pagination', 'start', $total_archive, $this->config['ub_latest_blogs'], $start);
+		
+		$this->template->assign_vars(array(
+			'TOTAL_ARCHIVE_COUNT'		=> $this->user->lang('BLOG_ARCHIVE_COUNT', (int) $total_archive),
+		));
 
 		// Generate page title
 		page_header($archive_title);
