@@ -7,13 +7,13 @@
 	"time": "2015-11-10",
 	"license": "GPL-2.0",
 	"authors": [{
-			"name": "Gijs (posey) Martens",
+			"name": "posey",
 			"email": "admin@godfathertalks.com",
 			"homepage": "http://www.godfathertalks.com",
 			"role": "Lead Developer"
 		}],
 	"require": {
-		"php": ">=5.3.3"
+		"php": ">=5.4"
 	},
 	"require-dev": {
 		"phpbb/epv": "dev-master"
@@ -22,6 +22,11 @@
 		"display-name": "Ultimate Blog",
 		"soft-require": {
 			"phpbb/phpbb": ">=3.1.4"
+		},
+		"version-check": {
+			"host": "www.dmzx-web.net",
+			"directory": "/versions",
+			"filename": "ultimateblog_version.json"
 		}
 	}
 }

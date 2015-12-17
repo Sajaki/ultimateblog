@@ -36,6 +36,7 @@ if (empty($lang) || !is_array($lang))
 // ’ » “ ” …
 //
 // Merge the following language entries into the lang array
+
 $lang = array_merge($lang, array(
 	'ACP_ULTIMATEBLOG'					=> 'Ultimate Blog',
 	'ACP_ULTIMATEBLOG_SETTINGS_TITLE'	=> 'Blog Settings',

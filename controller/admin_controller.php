@@ -359,11 +359,6 @@ class admin_controller
 		}
 	}
 
-	public function display_tags()
-	{
-
-	}
-
 	// Set u_action accordingly
 	public function set_page_url($u_action)
 	{

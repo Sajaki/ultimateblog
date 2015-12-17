@@ -1,5 +1,7 @@
 # phpBB 3.1 Extension - Ultimate Blog
 
+[![Build Status](https://travis-ci.org/dmzx/ultimateblog.svg?branch=master)](https://travis-ci.org/dmzx/ultimateblog)
+
 ## Description
 The Ultimate Blog Extension
 
