@@ -25,7 +25,7 @@ class blog
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
 	protected $ub_comments_table;
-	protected $ub_tags_table;
+	protected $ub_rating_table;
 	protected $functions;
 
 	/**
@@ -46,7 +46,7 @@ class blog
 		$ub_blogs_table,
 		$ub_cats_table,
 		$ub_comments_table,
-		$ub_tags_table,
+		$ub_rating_table,
 		$functions)
 	{
 		$this->user		= $user;
@@ -63,12 +63,14 @@ class blog
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
 		$this->ub_comments_table = $ub_comments_table;
-		$this->ub_tags_table	= $ub_tags_table;
+		$this->ub_rating_table	= $ub_rating_table;
 		$this->functions		= $functions;
 	}
 
 	function latest()
 	{
+		$start = $this->request->variable('start', 0);
+
 		// Get latest blogs
 		$sql_array = [
 			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour',
@@ -88,17 +90,25 @@ class blog
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query_limit($sql, $this->config['ub_latest_blogs']);
+		$result = $this->db->sql_query_limit($sql, $this->config['ub_blogs_per_page'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			// Grab category name
-			$sql_cat = 'SELECT cat_name
-						FROM ' . $this->ub_cats_table . '
-						WHERE cat_id = ' . (int) $row['cat_id'];
-			$result_cat = $this->db->sql_query($sql_cat);
-			$cat_name = $this->db->sql_fetchfield('cat_name');
-			$this->db->sql_freeresult($result_cat);
+			// Grab category name and rating
+			$sql_ary = [
+				'SELECT'	=> 'c.cat_name, COUNT(br.rating) as total_rate_users, SUM(br.rating) as total_rate_sum',
+				'FROM'		=> [
+					$this->ub_cats_table => 'c',
+					$this->ub_rating_table => 'br',
+				],
+
+				'WHERE'		=> 'c.cat_id = ' . (int) $row['cat_id'] . ' AND br.blog_id = ' . (int) $row['blog_id'],
+			];
+
+			$sql_extra = $this->db->sql_build_query('SELECT', $sql_ary);
+			$result_extra = $this->db->sql_query($sql_extra);
+			$extra = $this->db->sql_fetchrow($result_extra);
+			$this->db->sql_freeresult($result_extra);
 
 			// Check BBCode Options
 			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
@@ -116,12 +126,13 @@ class blog
 
 			$this->template->assign_block_vars('blogs', [
 				'BLOG_ID'	=> $row['blog_id'],
-				'CAT'		=> $cat_name,
+				'CAT'		=> $extra['cat_name'],
 				'CAT_ID'	=> $row['cat_id'],
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
 				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'RATING'	=> $extra['total_rate_users'] > 0 ? $extra['total_rate_sum'] / $extra['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]),
 				'U_CAT'			=> $this->helper->route('posey_ultimateblog_category', ['cat_id' => (int) $row['cat_id']]),
@@ -142,6 +153,20 @@ class blog
 			'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog'),
 			'FORUM_NAME'		=> $this->user->lang('BLOG'),
 		]);
+
+		// Count blogs
+		$sql = 'SELECT *
+			FROM ' . $this->ub_blogs_table . '
+			ORDER BY blog_id ASC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total);
+		$total_blog_count = (int) sizeof($row_total);
+		$this->db->sql_freeresult($result_total);
+
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_blog'), 'pagination', 'start', $total_blog_count, $this->config['ub_blogs_per_page'], $start);
+
+		$this->template->assign_var('TOTAL_BLOGS', $this->user->lang('BLOG_BLOG_COUNT', (int) $total_blog_count));
 	}
 
 	function add()
@@ -197,7 +222,7 @@ class blog
 				$blog_id = (int) $this->db->sql_nextid();
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_ADDED', false, array($blog_row['blog_subject']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_ADDED', false, [$blog_row['blog_subject']]);
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_ADDED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $blog_id]) . '">' . $this->user->lang['BLOG_VIEW'] . ' &raquo;</a>');
@@ -286,7 +311,7 @@ class blog
 		}
 
 		// Assign template vars
-		$this->template->assign_vars(array(
+		$this->template->assign_vars([
 			'CATEGORIES'			=> $categories,
 			'BLOG_PREVIEW'			=> $blog_preview,
 			'SUBJECT'				=> $blog_preview ? $this->request->variable('subject', '') : '',
@@ -305,7 +330,7 @@ class blog
 			'S_BLOG_URLS'			=> $blog_preview ? $allow_urls : true,
 			'S_EDIT_LOCKED'			=> $blog_preview ? $edit_locked : false,
 			'S_ENABLE_COMMENTS'		=> $blog_preview ? $enable_comments : true,
-		));
+		]);
 	}
 
 	function edit($blog_id)
@@ -523,6 +548,16 @@ class blog
 					WHERE blog_id = ' . (int) $blog_id;
 			$this->db->sql_query($sql);
 
+			// Delete the blog comments
+			$sql = 'DELETE FROM ' . $this->ub_comments_table . '
+					WHERE blog_id = ' . (int) $blog_id;
+			$this->db->sql_query($sql);
+
+			// Delete the blog ratings
+			$sql = 'DELETE FROM ' . $this->ub_rating_table . '
+					WHERE blog_id = ' . (int) $blog_id;
+			$this->db->sql_query($sql);
+
 			// Add it to the log
 			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_DELETE', time(), array($blog_name));
 
@@ -558,12 +593,15 @@ class blog
 			trigger_error($this->user->lang['AUTH_BLOG_VIEW'] . '<br><br>' . $this->user->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->phpbb_root_path}index.{$this->php_ext}") . '">&laquo; ', '</a>'));
 		}
 
+		$start = $this->request->variable('start', 0);
+
 		// Get blog and poster info
 		$sql_array = [
-			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour, u.user_avatar, u.user_avatar_type, u.user_avatar_height, u.user_avatar_width',
+			'SELECT'	=> 'b.*, COUNT(br.rating) as total_rate_users, SUM(br.rating) as total_rate_sum, u.user_id, u.username, u.user_colour, u.user_avatar, u.user_avatar_type, u.user_avatar_height, u.user_avatar_width',
 
 			'FROM'		=> [
 				$this->ub_blogs_table => 'b',
+				$this->ub_rating_table => 'br',
 			],
 
 			'LEFT_JOIN' => [
@@ -573,7 +611,7 @@ class blog
 				]
 			],
 
-			'WHERE'		=> 'b.blog_id = ' . (int) $blog_id,
+			'WHERE'		=> 'b.blog_id = ' . (int) $blog_id . ' AND br.blog_id = ' . (int) $blog_id,
 
 			'ORDER_BY'	=> 'b.post_time DESC',
 		];
@@ -608,6 +646,10 @@ class blog
 		// Get Sidebar
 		$this->functions->sidebar();
 
+		// Check to see if user has already rated this blog
+		// If he has already rated, grab the rating
+		$rating = $this->has_rated($blog['blog_id']);
+
 		$this->template->assign_vars([
 			'BLOG_ID'			=> $blog['blog_id'],
 			'BLOG_SUBJECT'		=> $blog['blog_subject'],
@@ -616,8 +658,12 @@ class blog
 			'BLOG_POSTER'		=> get_username_string('full', $blog['user_id'], $blog['username'], $blog['user_colour']),
 			'BLOG_POST_TIME'	=> $this->user->format_date($blog['post_time'], 'F jS, Y'),
 			'BLOG_AVATAR'		=> phpbb_get_user_avatar($blog),
+			'BLOG_RATE_USERS'	=> $this->user->lang('BLOG_RATE_USERS', (int) $blog['total_rate_users']),
+			'BLOG_RATE_AVRG'	=> $blog['total_rate_users'] > 0 ? round(($blog['total_rate_sum'] / $blog['total_rate_users']), 1, PHP_ROUND_HALF_UP) : '',
+			'BLOG_RATE_IMG'		=> $blog['total_rate_users'] > 0 ? round(($blog['total_rate_sum'] / $blog['total_rate_users']), 0, PHP_ROUND_HALF_UP) : 0,
+			'BLOG_RATE_HAS'		=> $rating ? $this->user->lang('BLOG_RATED_ALREADY', $rating) : false,
 
-			'EDIT_LAST'		=> $this->user->lang('BLOG_EDIT_LAST', $edit_username, $this->user->format_date($blog['blog_edit_time'], 'F jS, Y')),
+			'EDIT_LAST'		=> $this->user->lang('BLOG_EDIT_LAST', '<span itemprop="editor">' . $edit_username . '</span>', '<span itemprop="dateModified">' . $this->user->format_date($blog['blog_edit_time'], 'F jS, Y') . '</span>'),
 			'EDIT_REASON'	=> $blog['blog_edit_reason'],
 			'EDIT_COUNT'	=> $this->user->lang('BLOG_EDIT_COUNT', (int) $blog['blog_edit_count']),
 
@@ -627,6 +673,8 @@ class blog
 			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
 			'S_BLOG_CAN_DELETE'	=> $this->auth->acl_get('m_blog_delete'),
 			'S_BLOG_CAN_EDIT'	=> (($this->auth->acl_get('u_blog_edit') && $this->user->data['user_id'] == $blog['user_id']) || $this->auth->acl_get('m_blog_edit')) ? true : false,
+			'S_BLOG_CAN_RATE'	=> ($this->auth->acl_get('u_blog_rate') && !$rating),
+			'S_BLOG_RATED'		=> $blog['total_rate_users'] > 0 ? true : false,
 			'S_COMMENT_CAN_ADD'	=> $this->auth->acl_get('u_blog_comment_make'),
 			'S_COMMENT_CAN_DEL'	=> $this->auth->acl_get('m_blog_comment_delete'),
 			'S_EDITED'			=> $blog['blog_edit_count'] > 0 ? true : false,
@@ -636,6 +684,7 @@ class blog
 			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
 			'U_BLOG_DELETE'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'delete', 'blog_id' => (int) $blog['blog_id']]),
 			'U_BLOG_EDIT'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'edit', 'blog_id' => (int) $blog['blog_id']]),
+			'U_BLOG_RATE'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'rate', 'blog_id' => (int) $blog['blog_id']]),
 		]);
 
 		// Grab comments for this blog
@@ -656,7 +705,7 @@ class blog
 			'ORDER_BY'	=> 'c.post_time ASC',
 		];
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['posts_per_page'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -687,6 +736,11 @@ class blog
 			{
 				// Comments have been disabled
 				trigger_error($this->user->lang['BLOG_COMMENTS'] . ' ' . $this->user->lang['BLOG_COMMENTS_DISABLED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+			else if ($this->request->variable('comment_text', '', true) == '')
+			{
+				// Comment is empty
+				trigger_error($this->user->lang['BLOG_COMMENT_EMPTY'] . ' ' . $this->user->lang['BLOG_COMMENTS_DISABLED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
 			}
 			else if (!check_form_key('submit_comment'))
 			{
@@ -742,7 +796,63 @@ class blog
 			]);
 		}
 
+		// Count comments
+		$sql = 'SELECT *
+				FROM ' . $this->ub_comments_table . '
+				WHERE blog_id = ' . (int) $blog_id . '
+				ORDER BY comment_id ASC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total);
+		$total_comment_count = (int) sizeof($row_total);
+		$this->db->sql_freeresult($result_total);
+
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]), 'pagination', 'start', $total_comment_count, $this->config['posts_per_page'], $start);
+
+		$this->template->assign_var('TOTAL_BLOG_COMMENTS', $this->user->lang('BLOG_COMMENTS_COUNT', (int) $total_comment_count));
+
 		// Generate the page title
 		page_header($blog['blog_subject']);
+	}
+
+	function rate($blog_id)
+	{
+		$rating = $this->has_rated($blog_id);
+
+		if ($rating)
+		{
+			// User has already rated this blog
+			trigger_error($this->user->lang('BLOG_RATED_ALREADY', $rating) . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+		}
+		else
+		{
+			// Insert Rating
+			$data = [
+				'blog_id'	=> (int) $blog_id,
+				'user_id'	=> (int) $this->user->data['user_id'],
+				'rating'	=> (int) $this->request->variable('blog_rating', 0),
+				'rate_time'	=> time(),
+			];
+
+			$sql = 'INSERT INTO ' . $this->ub_rating_table . ' ' . $this->db->sql_build_array('INSERT', $data);
+			$this->db->sql_query($sql);
+
+			// Trigger 'thank you for voting' message
+			trigger_error($this->user->lang('BLOG_RATED', $this->request->variable('blog_rating', 0)) . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+		}
+	}
+
+	function has_rated($blog_id)
+	{
+		// Check to see if the user has already rated, if so; grab the rating
+		$sql = 'SELECT rating
+				FROM ' . $this->ub_rating_table . '
+				WHERE blog_id = ' . (int) $blog_id . '
+					AND user_id = ' . (int) $this->user->data['user_id'];
+		$result = $this->db->sql_query($sql);
+		$rating = $this->db->sql_fetchfield('rating');
+		$this->db->sql_freeresult($result);
+
+		return $rating ? $rating : false;
 	}
 }

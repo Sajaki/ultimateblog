@@ -62,8 +62,8 @@ $lang = array_merge($lang, array(
 	'ACP_UB_SETTINGS_EXPLAIN'			=> 'Alter the settings for the Ultimate Blog extension in here',
 	'ACP_UB_SETTINGS_ENABLE'			=> 'Enable Ultimate Blog',
 	'ACP_UB_SETTINGS_DISABLED'			=> 'Ultimate Blog is currently disabled!',
-	'ACP_UB_SETTINGS_LATEST_BLOGS'		=> 'Amount of latest blogs',
-	'ACP_UB_SETTINGS_LATEST_BLOGS_EXPLAIN'	=> 'The amount of blogs that should be displayed on the main blogs page',
+	'ACP_UB_SETTINGS_BLOGS_PER_PAGE'	=> 'Blogs per page',
+	'ACP_UB_SETTINGS_BLOGS_PER_PAGE_EXPLAIN'	=> 'The amount of blogs that should be displayed per page.',
 	'ACP_UB_SETTINGS_CUTOFF'			=> 'Latest Blog Cut Off',
 	'ACP_UB_SETTINGS_CUTOFF_EXPLAIN'	=> 'Enter after how many characters the blog post should be cut off for display in the Latest Blogs.<br>Users will then have to visit the blog to read the full story.<br>Set to <strong>0</strong> to display the full blog.',
 

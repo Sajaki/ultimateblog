@@ -1,20 +1,22 @@
 <!-- INCLUDE overall_header.html -->
 
 <!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
+
 <h1 class="blog-name">{L_BLOG}</h1>
 
 <div class="panel blog-panel">
 	<div class="inner">
-		<!-- INCLUDE sidebar.html -->
-		<div class="blog">
-			<h2 class="blog-subject">{BLOG_SUBJECT}</h2>
+		<!-- INCLUDE blog_sidebar.html -->
+
+		<div class="blog" itemscope itemtype="http://schema.org/BlogPosting">
+			<h2 class="blog-subject" itemprop="name">{BLOG_SUBJECT}</h2>
 			<!-- IF S_BLOG_CAN_DELETE --><a href="{U_BLOG_DELETE}" class="button icon-button delete-icon blog-edit" title="{L_BLOG_DELETE}">{L_BLOG_DELETE}</a><!-- ENDIF -->
 			<!-- IF S_BLOG_CAN_EDIT --><a href="{U_BLOG_EDIT}" class="button icon-button edit-icon blog-edit" title="{L_BLOG_EDIT}">{L_BLOG_EDIT}</a><!-- ENDIF -->
 			<!-- IF BLOG_AVATAR --><div class="blog-avatar">{BLOG_AVATAR}</div><!-- ENDIF -->
 			<div class="blog-posted<!-- IF BLOG_AVATAR --> blog-posted-avatar<!-- ENDIF -->">
-				{L_BLOG_AUTHOR}{L_COLON} {BLOG_POSTER}<br>
-				{L_CATEGORY}{L_COLON} <a href="{CAT_LINK}" title="{CAT_NAME}" alt="">{CAT_NAME}</a><br>
-				{L_BLOG_POSTED_ON}{L_COLON} {BLOG_POST_TIME}
+				{L_BLOG_AUTHOR}{L_COLON} <span itemprop="author">{BLOG_POSTER}</span><br>
+				{L_CATEGORY}{L_COLON} <a href="{CAT_LINK}" title="{CAT_NAME}" alt=""><span itemprop="articleSection">{CAT_NAME}</span></a><br>
+				{L_BLOG_POSTED_ON}{L_COLON} <span itemprop="dateCreated">{BLOG_POST_TIME}</span>
 				<!-- IF S_EDITED -->
 					<br>{EDIT_LAST}<br>
 					<!-- IF EDIT_REASON -->{L_BLOG_EDIT_REASON}{L_COLON} {EDIT_REASON}<br><!-- ENDIF -->
@@ -22,11 +24,54 @@
 				<!-- ENDIF -->
 			</div>
 			<br><br>
-			<div class="blog-text">
+			<div class="blog-text" itemprop="articleBody">
 				{BLOG_TEXT}
 			</div>
 			<br><br>
-			<div class="blog-comments">
+			<div class="blog-rating">
+				<!-- IF not S_BLOG_RATED -->
+					{L_BLOG_RATE_NONE}
+				<!-- ENDIF -->
+				<!-- IF S_BLOG_CAN_RATE -->
+					<form id="blog_rate" action="{U_BLOG_RATE}" method="post">
+						<div id="star-rating">
+							{L_BLOG_RATE}{L_COLON}
+							<input type="radio" name="blog_rating" class="rating" value="1" />
+							<input type="radio" name="blog_rating" class="rating" value="2" />
+							<input type="radio" name="blog_rating" class="rating" value="3" />
+							<input type="radio" name="blog_rating" class="rating" value="4" />
+							<input type="radio" name="blog_rating" class="rating" value="5" />
+						</div>
+						<br><br>
+					</form>
+				<!-- ELSEIF BLOG_RATE_HAS -->
+					{BLOG_RATE_HAS}
+				<!-- ENDIF -->
+				<!-- IF S_BLOG_RATED -->
+					<div itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">
+						<img src="{ROOT_PATH}ext/posey/ultimateblog/styles/all/theme/images/{BLOG_RATE_IMG}.png" alt="{L_BLOG_RATING}{L_COLON} {BLOG_RATE_IMG}" /><br>
+						{L_BLOG_RATING}{L_COLON} <span itemprop="ratingValue">{BLOG_RATE_AVRG}<span><br>
+						{BLOG_RATE_USERS}
+					</div>
+				<!-- ENDIF -->
+			</div>
+			<br>
+
+			<div class="blog-comments" itemprop="comment">
+				<!-- IF .comments -->
+					<div class="action-bar top">
+						<!-- IF .pagination or TOTAL_BLOG_COMMENTS -->
+						<div class="pagination">
+							<span itemprop="commentCount">{TOTAL_BLOG_COMMENTS}</span>
+							<!-- IF .pagination -->
+								<!-- INCLUDE pagination.html -->
+							<!-- ELSE -->
+								&bull; {PAGE_NUMBER}
+							<!-- ENDIF -->
+						</div>
+						<!-- ENDIF -->
+					</div>
+				<!-- ENDIF -->
 				<!-- BEGIN comments -->
 					<div class="blog-comment-avatar">
 						<a name="c{comments.ID}"></a>

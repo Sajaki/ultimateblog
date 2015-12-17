@@ -80,17 +80,17 @@ class admin_controller
 			}
 			else
 			{
-				$ub_enabled 	= $this->request->variable('ub_enabled', 1);
-				$ub_latest_blogs = $this->request->variable('ub_latest_blogs', 5);
-				$ub_cutoff 		= $this->request->variable('ub_cutoff', 1500);
+				$ub_enabled 		= $this->request->variable('ub_enabled', 1);
+				$ub_blogs_per_page	= $this->request->variable('ub_blogs_per_page', 5);
+				$ub_cutoff 			= $this->request->variable('ub_cutoff', 1500);
 
 				if ($ub_enabled != $this->config['ub_enabled'])
 				{
 					$this->config->set('ub_enabled', $ub_enabled);
 				}
-				if ($ub_latest_blogs != $this->config['ub_latest_blogs'])
+				if ($ub_blogs_per_page != $this->config['ub_blogs_per_page'])
 				{
-					$this->config->set('ub_latest_blogs', $ub_latest_blogs);
+					$this->config->set('ub_blogs_per_page', $ub_blogs_per_page);
 				}
 				if ($ub_cutoff != $this->config['ub_cutoff'])
 				{
@@ -108,7 +108,7 @@ class admin_controller
 		{
 			$this->template->assign_vars(array(
 				'UB_ENABLED'		=> ($this->config['ub_enabled']) ? true : false,
-				'UB_LATEST_BLOGS'	=> $this->config['ub_latest_blogs'],
+				'UB_BLOGS_PER_PAGE'	=> $this->config['ub_blogs_per_page'],
 				'UB_CUTOFF'			=> $this->config['ub_cutoff'],
 				'S_UB_MAIN'			=> true,
 			));
@@ -120,29 +120,30 @@ class admin_controller
 	 */
 	public function display_categories()
 	{
-		$start = $this->request->variable('start', 0);
-		$pagination_url = $this->u_action;
-
 		// Select categories
-		$sql = 'SELECT *
-				FROM ' . $this->ub_cats_table . '
-				ORDER BY cat_id ASC';
-		$result = $this->db->sql_query_limit($sql, $this->config['topics_per_page'], $start);
-		$result_total = $this->db->sql_query($sql);
-		$row_total = $this->db->sql_fetchrowset($result_total); // Required for pagination
-		$total_count = (int) sizeof($row_total); // Required for pagination
-		$this->db->sql_freeresult($result_total);
+		$sql_array = [
+			'SELECT'	=> 'c.*, COUNT(b.cat_id) as blog_count',
+
+			'FROM'		=> [
+				$this->ub_cats_table => 'c',
+			],
+
+			'LEFT_JOIN' => [
+				[
+					'FROM'	=> [$this->ub_blogs_table => 'b'],
+					'ON'	=> 'c.cat_id = b.cat_id',
+				]
+			],
+
+			'GROUP_BY'	=> 'c.cat_id',
+
+			'ORDER_BY'	=> 'c.cat_id ASC',
+		];
+		$sql = $this->db->sql_build_query('SELECT', $sql_array);
+		$result = $this->db->sql_query($sql);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			// Select blog count per category
-			$sql = 'SELECT COUNT(blog_id) as blog_count
-					FROM ' . $this->ub_blogs_table . '
-					WHERE cat_id = ' . $row['cat_id'];
-			$result_count = $this->db->sql_query($sql);
-			$blog_count = $this->db->sql_fetchfield('blog_count');
-			$this->db->sql_freeresult($result_count);
-
 			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 								(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
 								(($row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
@@ -151,8 +152,7 @@ class admin_controller
 				'NAME'			=> $row['cat_name'],
 				'DESC'			=> generate_text_for_display($row['cat_desc'], $row['bbcode_uid'], $row['bbcode_bitfield'], $bbcode_options),
 				'ID'			=> $row['cat_id'],
-				'BLOG_COUNT'	=> $blog_count,
-				'U_CAT'			=> $this->helper->route('posey_ultimateblog_categories', array('cat_id' => $row['cat_id'])),
+				'BLOG_COUNT'	=> $row['blog_count'],
 				'U_EDIT'		=> $this->u_action . "&amp;cat_id={$row['cat_id']}&amp;action=edit",
 				'U_DELETE'		=> $this->u_action . "&amp;cat_id={$row['cat_id']}&amp;action=delete",
 			));
@@ -160,11 +160,7 @@ class admin_controller
 
 		$this->db->sql_freeresult($result);
 
-		$start = $this->pagination->validate_start($start, $this->config['topics_per_page'], $total_count);
-		$this->pagination->generate_template_pagination($pagination_url, 'pagination', 'start', $total_count, $this->config['topics_per_page'], $start);
-
 		$this->template->assign_vars(array(
-			'TOTAL_CATS'	=> $total_count,
 			'S_CATS'		=> true,
 		));
 	}
@@ -290,7 +286,7 @@ class admin_controller
 
 		// Decode description for editing
 		decode_message($cat_row['cat_desc'], $cat_row['bbcode_uid']);
-		print_r($blog['blog_subject']);
+
 		$this->template->assign_vars(array(
 			'U_ACTION'		=> $this->u_action . "&amp;cat_id=$cat_id&amp;action=edit",
 			'U_BACK'		=> $this->u_action . '&amp;mode=categories',

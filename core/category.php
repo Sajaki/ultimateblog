@@ -24,6 +24,7 @@ class category
 	protected $php_ext;
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
+	protected $ub_rating_table;
 	protected $functions;
 
 	/**
@@ -43,6 +44,7 @@ class category
 		$php_ext,
 		$ub_blogs_table,
 		$ub_cats_table,
+		$ub_rating_table,
 		$functions)
 	{
 		$this->user		= $user;
@@ -58,6 +60,7 @@ class category
 		$this->php_ext			= $php_ext;
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
+		$this->ub_rating_table	= $ub_rating_table;
 		$this->functions		= $functions;
 	}
 
@@ -74,6 +77,8 @@ class category
 		{
 			trigger_error($this->user->lang['AUTH_BLOG_VIEW'] . '<br><br>' . $this->user->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->phpbb_root_path}index.{$this->php_ext}") . '">&laquo; ', '</a>'));
 		}
+
+		$start = $this->request->variable('start', 0);
 
 		$sql_array = [
 			'SELECT'	=> 'c.*, COUNT(b.cat_id) as blog_count',
@@ -94,7 +99,7 @@ class category
 			'ORDER_BY'	=> 'c.cat_id ASC',
 		];
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['posts_per_page'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -138,6 +143,22 @@ class category
 			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
 			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
 		]);
+
+		// Count categories
+		$sql = 'SELECT *
+			FROM ' . $this->ub_cats_table . '
+			ORDER BY cat_id ASC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total);
+		$total_count = (int) sizeof($row_total);
+		$this->db->sql_freeresult($result_total);
+
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_categories'), 'pagination', 'start', $total_count, $this->config['posts_per_page'], $start);
+
+		$this->template->assign_vars(array(
+			'TOTAL_CATS'		=> $this->user->lang('BLOG_CATS_COUNT', (int) $total_count),
+		));
 	}
 
 	function display($cat_id)
@@ -154,19 +175,16 @@ class category
 			trigger_error($this->user->lang['AUTH_BLOG_VIEW'] . '<br><br>' . $this->user->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->phpbb_root_path}index.{$this->php_ext}") . '">&laquo; ', '</a>'));
 		}
 
-		// Grab category name
-		$sql_cat = 'SELECT cat_name
-					FROM ' . $this->ub_cats_table . '
-					WHERE cat_id = ' . (int) $cat_id;
-		$result_cat = $this->db->sql_query($sql_cat);
-		$cat_name = $this->db->sql_fetchfield('cat_name');
-		$this->db->sql_freeresult($result_cat);
+		$start = $this->request->variable('start', 0);
 
 		// Get blogs for this category
 		$sql_array = [
-			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour',
+			'SELECT'	=> 'b.*, c.cat_name, u.user_id, u.username, u.user_colour',
 
-			'FROM'		=> [$this->ub_blogs_table => 'b'],
+			'FROM'		=> [
+				$this->ub_blogs_table => 'b',
+				$this->ub_cats_table => 'c',
+			],
 
 			'LEFT_JOIN' => [
 				[
@@ -175,16 +193,24 @@ class category
 				]
 			],
 
-			'WHERE'		=> 'b.cat_id = ' . (int) $cat_id,
+			'WHERE'		=> 'b.cat_id = ' . (int) $cat_id . ' AND c.cat_id = ' . (int) $cat_id,
 
 			'ORDER_BY'	=> 'b.post_time DESC',
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['ub_blogs_per_page'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
+			// Grab blog rating
+			$sql_rating = 'SELECT COUNT(rating) as total_rate_users, SUM(rating) as total_rate_sum
+						FROM ' . $this->ub_rating_table . '
+						WHERE blog_id = ' . (int) $row['blog_id'];
+			$result_rating = $this->db->sql_query($sql_rating);
+			$rating = $this->db->sql_fetchrow($result_rating);
+			$this->db->sql_freeresult($result_rating);
+
 			// Check BBCode Options
 			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 								(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
@@ -199,17 +225,32 @@ class category
 				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... <a href="' . $this->helper->route('posey_ultimateblog_blog', ['blog_id' => (int) $row['blog_id']]) . ' alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '"><em>' . $this->user->lang['BLOG_READ_FULL'] . '</em></a>' : $text;
 			}
 
+			// Get category name, same for all rows
+			$cat_name = $row['cat_name'];
+
 			$this->template->assign_block_vars('blogs', [
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
 				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'RATING'	=> $rating['total_rate_users'] > 0 ? $rating['total_rate_sum'] / $rating['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $row['blog_id']]),
 				'U_CAT'			=> $this->helper->route('posey_ultimateblog_category', ['cat_id' => (int) $cat_id]),
 			]);
 		}
 		$this->db->sql_freeresult($result);
+
+		// If category is empty we still need the category name
+		if (!$row)
+		{
+			$sql = 'SELECT cat_name
+					FROM ' . $this->ub_cats_table . '
+					WHERE cat_id = ' . (int) $cat_id;
+			$result = $this->db->sql_query($sql);
+			$cat_name = $this->db->sql_fetchfield('cat_name');
+			$this->db->sql_freeresult($result);
+		}
 
 		$this->template->assign_vars([
 			'CAT_NAME'			=> $cat_name,
@@ -244,6 +285,23 @@ class category
 				'U_VIEW_FORUM'	=> $name['U_VIEW_FORUM'],
 			]);
 		}
+
+		// Count categories blogs
+		$sql = 'SELECT *
+			FROM ' . $this->ub_blogs_table . '
+			WHERE cat_id = ' . (int) $cat_id . '
+			ORDER BY cat_id ASC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total);
+		$total_catergory_blogs = (int) sizeof($row_total);
+		$this->db->sql_freeresult($result_total);
+
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_category', array('cat_id' => $cat_id)), 'pagination', 'start', $total_catergory_blogs, $this->config['ub_blogs_per_page'], $start);
+
+		$this->template->assign_vars(array(
+			'TOTAL_CATEGORY_BLOGS'		=> $this->user->lang('BLOG_BLOG_CATEGORY_COUNT', (int) $total_catergory_blogs),
+		));
 
 		// Generate page title
 		page_header($cat_name);

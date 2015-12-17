@@ -19,11 +19,13 @@ class functions
 	protected $auth;
 	protected $log;
 	protected $request;
+	protected $pagination;
 	protected $phpbb_root_path;
 	protected $php_ext;
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
 	protected $ub_comments_table;
+	protected $ub_rating_table;
 
 	/**
 	* Constructor
@@ -37,11 +39,13 @@ class functions
 		\phpbb\auth\auth $auth,
 		\phpbb\log\log $log,
 		\phpbb\request\request $request,
+		\phpbb\pagination $pagination,
 		$phpbb_root_path,
 		$php_ext,
 		$ub_blogs_table,
 		$ub_cats_table,
-		$ub_comments_table)
+		$ub_comments_table,
+		$ub_rating_table)
 	{
 		$this->template	= $template;
 		$this->db		= $db;
@@ -51,11 +55,13 @@ class functions
 		$this->auth		= $auth;
 		$this->log		= $log;
 		$this->request	= $request;
+		$this->pagination		= $pagination;
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->php_ext			= $php_ext;
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
 		$this->ub_comments_table = $ub_comments_table;
+		$this->ub_rating_table	= $ub_rating_table;
 	}
 
 	function sidebar()
@@ -105,6 +111,8 @@ class functions
 			trigger_error($this->user->lang['AUTH_BLOG_VIEW'] . '<br><br>' . $this->user->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->phpbb_root_path}index.{$this->php_ext}") . '">&laquo; ', '</a>'));
 		}
 
+		$start = $this->request->variable('start', 0);
+
 		$sql_array = [
 			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour',
 
@@ -124,17 +132,25 @@ class functions
 		];
 
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['ub_blogs_per_page'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			// Get category name
-			$cat_sql = 'SELECT cat_name
-						FROM ' . $this->ub_cats_table . '
-						WHERE cat_id = ' . (int) $row['cat_id'];
-			$cat_result = $this->db->sql_query($cat_sql);
-			$cat_name = $this->db->sql_fetchfield('cat_name');
-			$this->db->sql_freeresult($cat_result);
+			// Grab category name and rating
+			$sql_ary = [
+				'SELECT'	=> 'c.cat_name, COUNT(br.rating) as total_rate_users, SUM(br.rating) as total_rate_sum',
+				'FROM'		=> [
+					$this->ub_cats_table => 'c',
+					$this->ub_rating_table => 'br',
+				],
+
+				'WHERE'		=> 'c.cat_id = ' . (int) $row['cat_id'] . ' AND br.blog_id = ' . (int) $row['blog_id'],
+			];
+
+			$sql_extra = $this->db->sql_build_query('SELECT', $sql_ary);
+			$result_extra = $this->db->sql_query($sql_extra);
+			$extra = $this->db->sql_fetchrow($result_extra);
+			$this->db->sql_freeresult($result_extra);
 
 			// Check BBCode Options
 			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
@@ -151,11 +167,12 @@ class functions
 			}
 
 			$this->template->assign_block_vars('blogs', [
-				'CAT'		=> $cat_name,
+				'CAT'		=> $extra['cat_name'],
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
 				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'RATING'	=> $extra['total_rate_users'] > 0 ? $extra['total_rate_sum'] / $extra['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $row['blog_id']]),
 				'U_CAT'			=> $this->helper->route('posey_ultimateblog_category', ['cat_id' => (int) $row['cat_id']]),
@@ -195,6 +212,24 @@ class functions
 				'U_VIEW_FORUM'	=> $name['U_VIEW_FORUM'],
 			]);
 		}
+
+		// Count archives
+		$sql = 'SELECT *
+			FROM ' . $this->ub_blogs_table . '
+			WHERE MONTH(FROM_UNIXTIME(post_time)) = ' . (int) $month . '
+			AND YEAR(FROM_UNIXTIME(post_time)) = ' . (int) $year . '
+			ORDER BY post_time DESC';
+		$result_total = $this->db->sql_query($sql);
+		$row_total = $this->db->sql_fetchrowset($result_total);
+		$total_archive = (int) sizeof($row_total);
+		$this->db->sql_freeresult($result_total);
+
+		//Start pagination
+		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_archive', array('year' => $year, 'month' => $month )), 'pagination', 'start', $total_archive, $this->config['ub_blogs_per_page'], $start);
+
+		$this->template->assign_vars(array(
+			'TOTAL_ARCHIVE_COUNT'		=> $this->user->lang('BLOG_ARCHIVE_COUNT', (int) $total_archive),
+		));
 
 		// Generate page title
 		page_header($archive_title);

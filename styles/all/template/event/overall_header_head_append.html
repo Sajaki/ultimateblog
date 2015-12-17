@@ -1,5 +1,14 @@
 <!-- IF S_BLOG_ENABLED -->
 	<!-- IF BLOG_DESCRIPTION and S_IS_BOT --><meta name="description" content="{BLOG_DESCRIPTION}" /><!-- ENDIF -->
 	<!-- INCLUDECSS @posey_ultimateblog/ultimateblog.css -->
+	<!-- INCLUDEJS @posey_ultimateblog/js/rating.js -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(function(){
+			$('#star-rating').rating(function(vote, event){
+				$('#blog_rate').submit();
+			});
+		});
+	</script>
 <!-- ENDIF -->
 

@@ -1,12 +1,29 @@
 <!-- INCLUDE overall_header.html -->
+
 <!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
+
 <h1 class="blog-name">{L_BLOG}</h1>
+
+<div class="action-bar top">
+	<!-- IF .pagination or TOTAL_BLOGS -->
+	<div class="pagination">
+		{TOTAL_BLOGS}
+		<!-- IF .pagination -->
+			<!-- INCLUDE pagination.html -->
+		<!-- ELSE -->
+			&bull; {PAGE_NUMBER}
+		<!-- ENDIF -->
+	</div>
+	<!-- ENDIF -->
+</div>
 
 <div class="panel blog-panel">
 	<div class="inner">
-		<!-- INCLUDE sidebar.html -->
+
+		<!-- INCLUDE blog_sidebar.html -->
+
 		<!-- BEGIN blogs -->
-			<div class="blog<!-- IF not blogs.S_LAST_ROW --> blog-border<!-- ENDIF -->">
+			<div class="blog<!-- IF blogs.RATING == '5' --> five-star<!-- ENDIF --><!-- IF not blogs.S_LAST_ROW --> blog-border<!-- ENDIF -->">
 				<!-- IF not blogs.S_FIRST_ROW --><br><!-- ENDIF -->
 				<h2 class="blog-subject"><a href="{blogs.U_BLOG}" alt="" title="{L_BLOG_READ_FULL}">{blogs.SUBJECT}</a></h2>
 				<span class="blog-posted">{L_BLOG_POSTED_BY} {blogs.POSTER} {L_BLOG_IN} <a href="{blogs.U_CAT}" title="{blogs.CAT}" alt="">{blogs.CAT}</a> {L_BLOG_ON} {blogs.POST_TIME}</span>

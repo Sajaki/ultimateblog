@@ -62,12 +62,6 @@ class main_module
 					break;
 				}
 			break;
-
-			case 'tags':
-				$this->tpl_name = 'acp_ultimateblog_tags';
-				$this->page_title = $user->lang['ACP_ULTIMATEBLOG_TAGS_TITLE'];
-				$admin_controller->display_tags();
-			break;
 		}
 	}
 }

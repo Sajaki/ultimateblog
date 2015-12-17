@@ -75,6 +75,10 @@ class main_controller
 				$this->blog->delete($blog_id);
 			break;
 
+			case 'rate':
+				$this->blog->rate($blog_id);
+			break;
+
  			default:
  				$this->blog->latest();
 				// Generate the page template

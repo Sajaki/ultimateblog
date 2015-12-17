@@ -1,5 +1,5 @@
 parameters:
-    posey.ultimateblog.table.ub.tags: %core.table_prefix%ub_tags
     posey.ultimateblog.table.ub.cats: %core.table_prefix%ub_cats
     posey.ultimateblog.table.ub.blogs: %core.table_prefix%ub_blogs
+    posey.ultimateblog.table.ub.rating: %core.table_prefix%ub_rating
     posey.ultimateblog.table.ub.comments: %core.table_prefix%ub_comments
