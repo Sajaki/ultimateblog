@@ -59,17 +59,17 @@ class main_controller
 
 		switch($action)
 		{
- 			case 'add':
- 				$this->blog->add();
+			case 'add':
+				$this->blog->add();
 				// Generate the page template
 				return $this->helper->render('blog_add.html', $this->user->lang('BLOG_ADD'));
- 			break;
+			break;
 
- 			case 'edit':
+			case 'edit':
 				$this->blog->edit($blog_id);
 				// Generate the page template
 				return $this->helper->render('blog_add.html', $this->user->lang('BLOG_EDIT'));
- 			break;
+			break;
 
 			case 'delete':
 				$this->blog->delete($blog_id);
@@ -79,11 +79,11 @@ class main_controller
 				$this->blog->rate($blog_id);
 			break;
 
- 			default:
- 				$this->blog->latest();
+			default:
+				$this->blog->latest();
 				// Generate the page template
 				return $this->helper->render('blogs_latest.html', $this->user->lang('BLOG'));
- 			break;
+			break;
 		}
 	}
 
