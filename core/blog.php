@@ -681,7 +681,7 @@ class blog
 			'S_BLOG_CAN_DELETE'	=> $this->auth->acl_get('m_blog_delete'),
 			'S_BLOG_CAN_EDIT'	=> (($this->auth->acl_get('u_blog_edit') && $this->user->data['user_id'] == $blog['user_id']) || $this->auth->acl_get('m_blog_edit')) ? true : false,
 			'S_BLOG_CAN_RATE'	=> ($this->auth->acl_get('u_blog_rate') && !$rating),
-			'S_BLOG_RATED'		=> $blog['total_rate_users'] > 0 ? true : false,
+			'S_BLOG_RATED'		=> $rate['total_rate_users'] > 0 ? true : false,
 			'S_COMMENT_CAN_ADD'	=> $this->auth->acl_get('u_blog_comment_make'),
 			'S_COMMENT_CAN_DEL'	=> $this->auth->acl_get('m_blog_comment_delete'),
 			'S_EDITED'			=> $blog['blog_edit_count'] > 0 ? true : false,
