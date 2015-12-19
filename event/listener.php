@@ -110,7 +110,7 @@ class listener implements EventSubscriberInterface
 			WHERE poster_id = ' . (int) $event['member']['user_id'];
 		$result = $this->db->sql_query($sql);
 		$total_blog_count = (int) $this->db->sql_fetchfield('blog_count');
-		
+
 		$sql = 'SELECT COUNT(comment_id) AS comment_count
 			FROM ' . $this->ub_comments_table . '
 			WHERE poster_id = ' . (int) $event['member']['user_id'];

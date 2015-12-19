@@ -133,7 +133,7 @@ $lang = array_merge($lang, array(
 	'ENABLE_COMMENTS'	=> 'Enable Comments',
 
 	'LOCK_EDIT'			=> 'Lock editing',
-	
+
 	'LOG_BLOG_ADDED'	=> 'New blog entry: %1$s',
 	'LOG_BLOG_EDITED'	=> 'Blog has been edited: %1$s',
 	'LOG_BLOG_DELETED'	=> 'Blog has been deleted: %1$s',
