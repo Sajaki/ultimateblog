@@ -3,7 +3,7 @@
 	"type": "phpbb-extension",
 	"description": "Ultimate Blog",
 	"homepage": "http://www.godfathertalks.com",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"time": "2015-11-10",
 	"license": "GPL-2.0",
 	"authors": [
