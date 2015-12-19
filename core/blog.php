@@ -94,21 +94,21 @@ class blog
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			// Grab category name and rating
-			$sql_ary = [
-				'SELECT'	=> 'c.cat_name, COUNT(br.rating) as total_rate_users, SUM(br.rating) as total_rate_sum',
-				'FROM'		=> [
-					$this->ub_cats_table => 'c',
-					$this->ub_rating_table => 'br',
-				],
+			// Grab category name
+			$cat_sql = 'SELECT cat_name
+						FROM ' . $this->ub_cats_table . '
+						WHERE cat_id = ' . (int) $row['cat_id'];
+			$cat_result = $this->db->sql_query($cat_sql);
+			$cat_name = $this->db->sql_fetchfield('cat_name');
+			$this->db->sql_freeresult($cat_result);
 
-				'WHERE'		=> 'c.cat_id = ' . (int) $row['cat_id'] . ' AND br.blog_id = ' . (int) $row['blog_id'],
-			];
-
-			$sql_extra = $this->db->sql_build_query('SELECT', $sql_ary);
-			$result_extra = $this->db->sql_query($sql_extra);
-			$extra = $this->db->sql_fetchrow($result_extra);
-			$this->db->sql_freeresult($result_extra);
+			// Grab rating
+			$r_sql = 'SELECT COUNT(rating) as total_rate_users, SUM(rating) as total_rate_sum
+					FROM ' . $this->ub_rating_table . '
+					WHERE blog_id = ' . (int) $row['blog_id'];
+			$r_result = $this->db->sql_query($r_sql);
+			$extra = $this->db->sql_fetchrow($r_result);
+			$this->db->sql_freeresult($r_result);
 
 			// Check BBCode Options
 			$bbcode_options =	(($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
@@ -126,12 +126,12 @@ class blog
 
 			$this->template->assign_block_vars('blogs', [
 				'BLOG_ID'	=> $row['blog_id'],
-				'CAT'		=> $extra['cat_name'],
+				'CAT'		=> $cat_name,
 				'CAT_ID'	=> $row['cat_id'],
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
-				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'POST_TIME'	=> $this->user->format_date($row['post_time']),
 				'RATING'	=> $extra['total_rate_users'] > 0 ? $extra['total_rate_sum'] / $extra['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]),
@@ -597,11 +597,10 @@ class blog
 
 		// Get blog and poster info
 		$sql_array = [
-			'SELECT'	=> 'b.*, COUNT(br.rating) as total_rate_users, SUM(br.rating) as total_rate_sum, u.user_id, u.username, u.user_colour, u.user_avatar, u.user_avatar_type, u.user_avatar_height, u.user_avatar_width',
+			'SELECT'	=> 'b.*, u.user_id, u.username, u.user_colour, u.user_avatar, u.user_avatar_type, u.user_avatar_height, u.user_avatar_width',
 
 			'FROM'		=> [
 				$this->ub_blogs_table => 'b',
-				$this->ub_rating_table => 'br',
 			],
 
 			'LEFT_JOIN' => [
@@ -611,7 +610,7 @@ class blog
 				]
 			],
 
-			'WHERE'		=> 'b.blog_id = ' . (int) $blog_id . ' AND br.blog_id = ' . (int) $blog_id,
+			'WHERE'		=> 'b.blog_id = ' . (int) $blog_id,
 
 			'ORDER_BY'	=> 'b.post_time DESC',
 		];
@@ -627,6 +626,14 @@ class blog
 				WHERE cat_id = ' . (int) $blog['cat_id'];
 		$result = $this->db->sql_query($sql);
 		$cat_name = $this->db->sql_fetchfield('cat_name');
+		$this->db->sql_freeresult($result);
+
+		// Grab rating
+		$sql = 'SELECT COUNT(rating) as total_rate_users, SUM(rating) as total_rate_sum
+				FROM ' . $this->ub_rating_table . '
+				WHERE blog_id = ' . (int) $blog_id;
+		$result = $this->db->sql_query($sql);
+		$rate = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 
 		// Get user who last edited
@@ -656,14 +663,14 @@ class blog
 			'BLOG_TEXT'			=> generate_text_for_display($blog['blog_text'], $blog['bbcode_uid'], $blog['bbcode_bitfield'], $bbcode_options),
 			'BLOG_DESCRIPTION'	=> $blog['blog_description'],
 			'BLOG_POSTER'		=> get_username_string('full', $blog['user_id'], $blog['username'], $blog['user_colour']),
-			'BLOG_POST_TIME'	=> $this->user->format_date($blog['post_time'], 'F jS, Y'),
+			'BLOG_POST_TIME'	=> $this->user->format_date($blog['post_time']),
 			'BLOG_AVATAR'		=> phpbb_get_user_avatar($blog),
-			'BLOG_RATE_USERS'	=> $this->user->lang('BLOG_RATE_USERS', (int) $blog['total_rate_users']),
-			'BLOG_RATE_AVRG'	=> $blog['total_rate_users'] > 0 ? round(($blog['total_rate_sum'] / $blog['total_rate_users']), 1, PHP_ROUND_HALF_UP) : '',
-			'BLOG_RATE_IMG'		=> $blog['total_rate_users'] > 0 ? round(($blog['total_rate_sum'] / $blog['total_rate_users']), 0, PHP_ROUND_HALF_UP) : 0,
+			'BLOG_RATE_USERS'	=> $this->user->lang('BLOG_RATE_USERS', (int) $rate['total_rate_users']),
+			'BLOG_RATE_AVRG'	=> $rate['total_rate_users'] > 0 ? round(($rate['total_rate_sum'] / $rate['total_rate_users']), 1, PHP_ROUND_HALF_UP) : 0.0,
+			'BLOG_RATE_IMG'		=> $rate['total_rate_users'] > 0 ? round(($rate['total_rate_sum'] / $rate['total_rate_users']), 0, PHP_ROUND_HALF_UP) : 0,
 			'BLOG_RATE_HAS'		=> $rating ? $this->user->lang('BLOG_RATED_ALREADY', $rating) : false,
 
-			'EDIT_LAST'		=> $this->user->lang('BLOG_EDIT_LAST', '<span itemprop="editor">' . $edit_username . '</span>', '<span itemprop="dateModified">' . $this->user->format_date($blog['blog_edit_time'], 'F jS, Y') . '</span>'),
+			'EDIT_LAST'		=> $blog['blog_edit_time'] > 0 ? $this->user->lang('BLOG_EDIT_LAST', '<span itemprop="editor">' . $edit_username . '</span>', '<span itemprop="dateModified">' . $this->user->format_date($blog['blog_edit_time']) . '</span>') : '',
 			'EDIT_REASON'	=> $blog['blog_edit_reason'],
 			'EDIT_COUNT'	=> $this->user->lang('BLOG_EDIT_COUNT', (int) $blog['blog_edit_count']),
 
@@ -704,6 +711,7 @@ class blog
 
 			'ORDER_BY'	=> 'c.post_time ASC',
 		];
+
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		$result = $this->db->sql_query_limit($sql, $this->config['posts_per_page'], $start);
 

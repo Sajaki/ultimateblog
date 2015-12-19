@@ -11,9 +11,11 @@ services:
            - '@log'
            - '@config'
            - '@auth'
+           - '@cache'
            - '@controller.helper'
            - '@request'
            - '@pagination'
+           - '@ext.manager'
            - '%core.root_path%'
            - '%core.php_ext%'
            - '%posey.ultimateblog.table.ub.blogs%'
@@ -47,6 +49,7 @@ services:
            - '%core.php_ext%'
            - '%posey.ultimateblog.table.ub.blogs%'
            - '%posey.ultimateblog.table.ub.cats%'
+           - '%posey.ultimateblog.table.ub.comments%'
         tags:
            - { name: event.listener }
 

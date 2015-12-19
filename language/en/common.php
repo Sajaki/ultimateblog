@@ -53,10 +53,6 @@ $lang = array_merge($lang, array(
 		1 => '%d blog',
 		2 => '%d blogs',
 	),
-	'BLOG_BLOG_CATEGORY_COUNT'	=> array(
-		1 => '%d category blog',
-		2 => '%d category blogs',
-	),
 	'BLOG_CATS'				=> 'Blog Categories',
 	'BLOG_CATS_COUNT'	=> array(
 		1 => '%d category',
@@ -82,6 +78,7 @@ $lang = array_merge($lang, array(
 	'BLOG_DELETE'			=> 'Delete blog',
 	'BLOG_DELETED'			=> 'The blog has been successfully deleted',
 	'BLOG_DELETE_CONFIRM'	=> 'Are you sure you wish to delete this blog?',
+	'BLOG_DESCRIPTION'		=> 'Blog Description',
 	'BLOG_EDIT'				=> 'Edit blog',
 	'BLOG_EDITED'			=> 'The blog has been successfully edited',
 	'BLOG_EDIT_COUNT'		=> array(

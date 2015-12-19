@@ -17,9 +17,11 @@ class admin_controller
 	protected $log;
 	protected $config;
 	protected $auth;
+	protected $cache;
 	protected $helper;
 	protected $request;
 	protected $pagination;
+	protected $phpbb_ext_manager;
 	protected $phpbb_root_path;
 	protected $phpbb_admin_path;
 	protected $ub_blogs_table;
@@ -35,9 +37,11 @@ class admin_controller
 		\phpbb\log\log $log,
 		\phpbb\config\config $config,
 		\phpbb\auth\auth $auth,
+		\phpbb\cache\service $cache,
 		\phpbb\controller\helper $helper,
 		\phpbb\request\request $request,
 		\phpbb\pagination $pagination,
+		\phpbb\extension\manager $phpbb_ext_manager,
 		$phpbb_root_path,
 		$phpbb_admin_path,
 		$ub_blogs_table,
@@ -49,9 +53,11 @@ class admin_controller
 		$this->log		= $log;
 		$this->config	= $config;
 		$this->auth		= $auth;
+		$this->cache	= $cache;
 		$this->helper	= $helper;
 		$this->request	= $request;
 		$this->pagination		= $pagination;
+		$this->phpbb_ext_manager = $phpbb_ext_manager;
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->phpbb_admin_path	= $phpbb_admin_path;
 		$this->ub_blogs_table	= $ub_blogs_table;
@@ -112,6 +118,40 @@ class admin_controller
 				'UB_CUTOFF'			=> $this->config['ub_cutoff'],
 				'S_UB_MAIN'			=> true,
 			));
+
+		// Version check
+		$this->user->add_lang(array('install', 'acp/extensions', 'migrator'));
+		$ext_name = 'posey/ultimateblog';
+		$md_manager = new \phpbb\extension\metadata_manager($ext_name, $this->config, $this->phpbb_ext_manager, $this->template, $this->user, $this->phpbb_root_path);
+		try
+		{
+			$this->metadata = $md_manager->get_metadata('all');
+		}
+		catch(\phpbb\extension\exception $e)
+		{
+			trigger_error($e, E_USER_WARNING);
+		}
+		$md_manager->output_template_data();
+		try
+		{
+			$updates_available = $this->version_check($md_manager, $this->request->variable('versioncheck_force', false));
+			$this->template->assign_vars(array(
+				'S_UP_TO_DATE'		=> empty($updates_available),
+				'S_VERSIONCHECK'	=> true,
+				'UP_TO_DATE_MSG'	=> $this->user->lang(empty($updates_available) ? 'UP_TO_DATE' : 'NOT_UP_TO_DATE', $md_manager->get_metadata('display-name')),
+			));
+			foreach ($updates_available as $branch => $version_data)
+			{
+				$this->template->assign_block_vars('updates_available', $version_data);
+			}
+		}
+		catch (\RuntimeException $e)
+		{
+			$this->template->assign_vars(array(
+				'S_VERSIONCHECK_STATUS'			=> $e->getCode(),
+				'VERSIONCHECK_FAIL_REASON'		=> ($e->getMessage() !== $this->user->lang('VERSIONCHECK_FAIL')) ? $e->getMessage() : '',
+			));
+		}
 		}
 	}
 
@@ -357,6 +397,21 @@ class admin_controller
 			// if the user chose not delete the category from the confirmation page.
 			redirect("{$this->u_action}");
 		}
+	}
+
+	protected function version_check(\phpbb\extension\metadata_manager $md_manager, $force_update = false, $force_cache = false)
+	{
+		$meta = $md_manager->get_metadata('all');
+		if (!isset($meta['extra']['version-check']))
+		{
+			throw new \RuntimeException($this->user->lang('NO_VERSIONCHECK'), 1);
+		}
+		$version_check = $meta['extra']['version-check'];
+		$version_helper = new \phpbb\version_helper($this->cache, $this->config, new \phpbb\file_downloader(), $this->user);
+		$version_helper->set_current_version($meta['version']);
+		$version_helper->set_file_location($version_check['host'], $version_check['directory'], $version_check['filename']);
+		$version_helper->force_stability($this->config['extension_force_unstable'] ? 'unstable' : null);
+		return $updates = $version_helper->get_suggested_updates($force_update, $force_cache);
 	}
 
 	// Set u_action accordingly

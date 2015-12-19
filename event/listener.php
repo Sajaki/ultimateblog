@@ -28,6 +28,7 @@ class listener implements EventSubscriberInterface
 	protected $php_ext;
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
+	protected $ub_comments_table;
 
 	/**
 	* Constructor
@@ -44,7 +45,8 @@ class listener implements EventSubscriberInterface
 		$phpbb_root_path,
 		$php_ext,
 		$ub_blogs_table,
-		$ub_cats_table)
+		$ub_cats_table,
+		$ub_comments_table)
 	{
 		$this->user		= $user;
 		$this->template	= $template;
@@ -58,6 +60,7 @@ class listener implements EventSubscriberInterface
 		$this->php_ext			= $php_ext;
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
+		$this->ub_comments_table = $ub_comments_table;
 	}
 
 	static public function getSubscribedEvents()
@@ -65,8 +68,9 @@ class listener implements EventSubscriberInterface
 		return [
 			'core.user_setup'						=> 'set_blog_lang',
 			'core.page_header'						=> 'add_page_header_link',
-			'core.permissions'						=> 'permissions',
+			'core.memberlist_view_profile'			=> 'viewprofile',
 			'core.viewonline_overwrite_location'	=> 'viewonline_page',
+			'core.permissions'						=> 'permissions',
 		];
 	}
 
@@ -82,13 +86,50 @@ class listener implements EventSubscriberInterface
 
 	public function add_page_header_link($event)
 	{
-		if ($this->config['ub_enabled'] == 1)
+		if (!empty($this->config['ub_enabled']))
 		{
 			$this->template->assign_vars([
 				'S_BLOG_ENABLED'	=> true,
+				'S_BLOG_VIEW'		=> $this->auth->acl_get('u_blog_view'),
 				'U_BLOG'			=> $this->helper->route('posey_ultimateblog_blog'),
 			]);
 		}
+	}
+
+	public function viewprofile($event)
+	{
+		// Return if Ultimate Blog is disabled
+		if (empty($this->config['ub_enabled']))
+		{
+			return;
+		}
+
+		// Get Blog Post and Blog Comment count
+		$sql_ary = [
+			'SELECT'	=> 'COUNT(b.blog_id) as blog_count, COUNT(bc.comment_id) as comment_count',
+			'FROM'		=> [
+				$this->ub_blogs_table => 'b',
+			],
+
+			'LEFT_JOIN' => [
+				[
+					'FROM'	=> [$this->ub_comments_table => 'bc'],
+					'ON'	=> 'b.poster_id = bc.poster_id',
+				]
+			],
+
+			'WHERE'		=> 'b.poster_id = ' . (int) $event['member']['user_id'],
+		];
+
+		$sql = $this->db->sql_build_query('SELECT', $sql_ary);
+		$result = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+
+		$this->template->assign_vars([
+			'BLOG_POSTS'	=> $row['blog_count'] > 0 ? $row['blog_count'] : '-',
+			'BLOG_COMMENTS' => $row['comment_count'] > 0 ? $row['comment_count'] : '-',
+		]);
 	}
 
 	public function viewonline_page($event)

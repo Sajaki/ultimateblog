@@ -222,7 +222,7 @@ class category
 			// Cut off blog text
 			if ($this->config['ub_cutoff'] != 0)
 			{
-				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... <a href="' . $this->helper->route('posey_ultimateblog_blog', ['blog_id' => (int) $row['blog_id']]) . ' alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '"><em>' . $this->user->lang['BLOG_READ_FULL'] . '</em></a>' : $text;
+				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... <a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" title="' . $this->user->lang['BLOG_READ_FULL'] . '" alt=""><em>' . $this->user->lang['BLOG_READ_FULL'] . '</em></a>' : $text;
 			}
 
 			// Get category name, same for all rows
@@ -232,7 +232,7 @@ class category
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
-				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'POST_TIME'	=> $this->user->format_date($row['post_time']),
 				'RATING'	=> $rating['total_rate_users'] > 0 ? $rating['total_rate_sum'] / $rating['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $row['blog_id']]),
@@ -300,7 +300,7 @@ class category
 		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_category', array('cat_id' => $cat_id)), 'pagination', 'start', $total_catergory_blogs, $this->config['ub_blogs_per_page'], $start);
 
 		$this->template->assign_vars(array(
-			'TOTAL_CATEGORY_BLOGS'		=> $this->user->lang('BLOG_BLOG_CATEGORY_COUNT', (int) $total_catergory_blogs),
+			'TOTAL_CATEGORY_BLOGS'		=> $this->user->lang('BLOG_BLOG_COUNT', (int) $total_catergory_blogs),
 		));
 
 		// Generate page title

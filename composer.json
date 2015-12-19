@@ -6,12 +6,19 @@
 	"version": "1.0.0",
 	"time": "2015-11-10",
 	"license": "GPL-2.0",
-	"authors": [{
+	"authors": [
+		{
 			"name": "posey",
 			"email": "admin@godfathertalks.com",
 			"homepage": "http://www.godfathertalks.com",
 			"role": "Lead Developer"
-		}],
+		},
+		{
+			"name": "dmzx",
+			"homepage": "http://www.dmzx-web.net",
+			"role": "Co-Developer"
+		}
+	],
 	"require": {
 		"php": ">=5.3.3"
 	},
