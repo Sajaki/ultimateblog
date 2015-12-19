@@ -131,7 +131,7 @@ class blog
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
-				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'POST_TIME'	=> $this->user->format_date($row['post_time']),
 				'RATING'	=> $extra['total_rate_users'] > 0 ? $extra['total_rate_sum'] / $extra['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]),
@@ -656,14 +656,14 @@ class blog
 			'BLOG_TEXT'			=> generate_text_for_display($blog['blog_text'], $blog['bbcode_uid'], $blog['bbcode_bitfield'], $bbcode_options),
 			'BLOG_DESCRIPTION'	=> $blog['blog_description'],
 			'BLOG_POSTER'		=> get_username_string('full', $blog['user_id'], $blog['username'], $blog['user_colour']),
-			'BLOG_POST_TIME'	=> $this->user->format_date($blog['post_time'], 'F jS, Y'),
+			'BLOG_POST_TIME'	=> $this->user->format_date($blog['post_time']),
 			'BLOG_AVATAR'		=> phpbb_get_user_avatar($blog),
 			'BLOG_RATE_USERS'	=> $this->user->lang('BLOG_RATE_USERS', (int) $blog['total_rate_users']),
 			'BLOG_RATE_AVRG'	=> $blog['total_rate_users'] > 0 ? round(($blog['total_rate_sum'] / $blog['total_rate_users']), 1, PHP_ROUND_HALF_UP) : '',
 			'BLOG_RATE_IMG'		=> $blog['total_rate_users'] > 0 ? round(($blog['total_rate_sum'] / $blog['total_rate_users']), 0, PHP_ROUND_HALF_UP) : 0,
 			'BLOG_RATE_HAS'		=> $rating ? $this->user->lang('BLOG_RATED_ALREADY', $rating) : false,
 
-			'EDIT_LAST'		=> $this->user->lang('BLOG_EDIT_LAST', '<span itemprop="editor">' . $edit_username . '</span>', '<span itemprop="dateModified">' . $this->user->format_date($blog['blog_edit_time'], 'F jS, Y') . '</span>'),
+			'EDIT_LAST'		=> $this->user->lang('BLOG_EDIT_LAST', '<span itemprop="editor">' . $edit_username . '</span>', '<span itemprop="dateModified">' . $this->user->format_date($blog['blog_edit_time']) . '</span>'),
 			'EDIT_REASON'	=> $blog['blog_edit_reason'],
 			'EDIT_COUNT'	=> $this->user->lang('BLOG_EDIT_COUNT', (int) $blog['blog_edit_count']),
 

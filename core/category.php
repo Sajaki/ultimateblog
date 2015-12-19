@@ -232,7 +232,7 @@ class category
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
-				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'POST_TIME'	=> $this->user->format_date($row['post_time']),
 				'RATING'	=> $rating['total_rate_users'] > 0 ? $rating['total_rate_sum'] / $rating['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $row['blog_id']]),

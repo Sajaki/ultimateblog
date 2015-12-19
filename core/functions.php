@@ -171,7 +171,7 @@ class functions
 				'SUBJECT'	=> $row['blog_subject'],
 				'TEXT'		=> $text,
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
-				'POST_TIME'	=> $this->user->format_date($row['post_time'], 'F jS, Y'),
+				'POST_TIME'	=> $this->user->format_date($row['post_time']),
 				'RATING'	=> $extra['total_rate_users'] > 0 ? $extra['total_rate_sum'] / $extra['total_rate_users'] : 0,
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $row['blog_id']]),
