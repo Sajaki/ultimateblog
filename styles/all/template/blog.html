@@ -75,7 +75,7 @@
 				<!-- BEGIN comments -->
 					<div class="blog-comment-avatar">
 						<a name="c{comments.ID}"></a>
-						{comments.AVATAR}
+						<!-- IF comments.AVATAR -->{comments.AVATAR}<!-- ELSE --><img src="{T_THEME_PATH}/images/no_avatar.gif" width="60px;" height="60px;" alt="" /><!-- ENDIF -->
 					</div>
 					<div class="blog-comment-text">
 						<!-- IF S_COMMENT_CAN_DEL -->
