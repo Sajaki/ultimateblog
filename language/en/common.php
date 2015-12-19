@@ -75,13 +75,14 @@ $lang = array_merge($lang, array(
 	'BLOG_COMMENTS_FURTHER'		=> 'Further comments',
 	'BLOG_COMMENTS_NONE'		=> 'No comments have been made for this blog thusfar!',
 	'BLOG_COMMENTS_DISABLED' 	=> 'have been disabled for this blog!',
-	'BLOG_DELETE'			=> 'Delete blog',
-	'BLOG_DELETED'			=> 'The blog has been successfully deleted',
-	'BLOG_DELETE_CONFIRM'	=> 'Are you sure you wish to delete this blog?',
-	'BLOG_DESCRIPTION'		=> 'Blog Description',
-	'BLOG_EDIT'				=> 'Edit blog',
-	'BLOG_EDITED'			=> 'The blog has been successfully edited',
-	'BLOG_EDIT_COUNT'		=> array(
+	'BLOG_DELETE'				=> 'Delete blog',
+	'BLOG_DELETED'				=> 'The blog has been successfully deleted',
+	'BLOG_DELETE_CONFIRM'		=> 'Are you sure you wish to delete this blog?',
+	'BLOG_DESCRIPTION'			=> 'Blog Description',
+	'BLOG_DESCRIPTION_FIELD'	=> 'Enter your blog description here. It must be between and 130 and 160 characters.',
+	'BLOG_EDIT'					=> 'Edit blog',
+	'BLOG_EDITED'				=> 'The blog has been successfully edited',
+	'BLOG_EDIT_COUNT'			=> array(
 		1	=> 'This blog has been edited %1$s time in total', // singular
 		2	=> 'This blog has been edited %1$s times in total', // plural
 	),
@@ -132,7 +133,7 @@ $lang = array_merge($lang, array(
 	'ENABLE_COMMENTS'	=> 'Enable Comments',
 
 	'LOCK_EDIT'			=> 'Lock editing',
-
+	
 	'LOG_BLOG_ADDED'	=> 'New blog entry: %1$s',
 	'LOG_BLOG_EDITED'	=> 'Blog has been edited: %1$s',
 	'LOG_BLOG_DELETED'	=> 'Blog has been deleted: %1$s',

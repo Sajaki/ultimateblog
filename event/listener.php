@@ -105,30 +105,21 @@ class listener implements EventSubscriberInterface
 		}
 
 		// Get Blog Post and Blog Comment count
-		$sql_ary = [
-			'SELECT'	=> 'COUNT(b.blog_id) as blog_count, COUNT(bc.comment_id) as comment_count',
-			'FROM'		=> [
-				$this->ub_blogs_table => 'b',
-			],
-
-			'LEFT_JOIN' => [
-				[
-					'FROM'	=> [$this->ub_comments_table => 'bc'],
-					'ON'	=> 'b.poster_id = bc.poster_id',
-				]
-			],
-
-			'WHERE'		=> 'b.poster_id = ' . (int) $event['member']['user_id'],
-		];
-
-		$sql = $this->db->sql_build_query('SELECT', $sql_ary);
+		$sql = 'SELECT COUNT(blog_id) AS blog_count
+			FROM ' . $this->ub_blogs_table . '
+			WHERE poster_id = ' . (int) $event['member']['user_id'];
 		$result = $this->db->sql_query($sql);
-		$row = $this->db->sql_fetchrow($result);
-		$this->db->sql_freeresult($result);
+		$total_blog_count = (int) $this->db->sql_fetchfield('blog_count');
+		
+		$sql = 'SELECT COUNT(comment_id) AS comment_count
+			FROM ' . $this->ub_comments_table . '
+			WHERE poster_id = ' . (int) $event['member']['user_id'];
+		$result = $this->db->sql_query($sql);
+		$total_comment_count = (int) $this->db->sql_fetchfield('comment_count');
 
 		$this->template->assign_vars([
-			'BLOG_POSTS'	=> $row['blog_count'] > 0 ? $row['blog_count'] : '-',
-			'BLOG_COMMENTS' => $row['comment_count'] > 0 ? $row['comment_count'] : '-',
+			'BLOG_POSTS'	=> $total_blog_count > 0 ? $total_blog_count : '-',
+			'BLOG_COMMENTS' => $total_comment_count > 0 ? $total_comment_count : '-',
 		]);
 	}
 
