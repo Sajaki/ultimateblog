@@ -390,7 +390,7 @@ class blog
 				$this->db->sql_query($sql);
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_EDITED', time(), array($blog_row['blog_subject']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_EDITED', false, array($blog_row['blog_subject']));
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_EDITED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">' . $this->user->lang['BLOG_VIEW'] . ' &raquo;</a>');
@@ -559,7 +559,7 @@ class blog
 			$this->db->sql_query($sql);
 
 			// Add it to the log
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_DELETE', time(), array($blog_name));
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_DELETED', false, array($blog_name));
 
 			// Send success message
 			trigger_error($this->user->lang['BLOG_DELETED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog') . '">&laquo; ' . $this->user->lang['BLOG_BACK'] . '</a>');

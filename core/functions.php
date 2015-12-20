@@ -354,7 +354,7 @@ class functions
 				$this->db->sql_query($sql);
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_COMMENT_EDITED', time(), (int) $comment_id);
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_COMMENT_EDITED', false, array($comment_id));
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_COMMENT_EDITED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '#c' . (int) $comment_id . '">' . $this->user->lang['BLOG_COMMENT_VIEW'] . ' &raquo;</a>');

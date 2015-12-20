@@ -103,11 +103,11 @@ class admin_controller
 					$this->config->set('ub_cutoff', $ub_cutoff);
 				}
 
-				// Show success message
-				trigger_error($this->user->lang('ACP_UB_SETTINGS_SAVED') . adm_back_link($this->u_action));
-
 				// Add to the log
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_SETTINGS_CHANGED');
+
+				// Show success message
+				trigger_error($this->user->lang('ACP_UB_SETTINGS_SAVED') . adm_back_link($this->u_action));
 			}
 		}
 		else
@@ -244,7 +244,7 @@ class admin_controller
 				$this->db->sql_query($sql);
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_ADD', time(), array($cat_row['cat_name']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_ADD', false, array($cat_row['cat_name']));
 
 				// Send success message
 				trigger_error($this->user->lang['ACP_UB_CAT_ADDED'] . adm_back_link($this->u_action));
@@ -303,7 +303,7 @@ class admin_controller
 				$this->db->sql_query($sql);
 
 				// Add it to the logg
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_EDIT', time(), array($cat_row['cat_name']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_EDIT', false, array($cat_row['cat_name']));
 
 				// Send success message
 				trigger_error($this->user->lang['ACP_UB_CAT_EDITED'] . adm_back_link($this->u_action));
@@ -373,7 +373,7 @@ class admin_controller
 					SET cat_id = 1
 					WHERE cat_id = ' . (int) $cat_id;
 			$this->db->sql_query($sql);
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_DELETE', time(), array($cat_name));
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_DELETE', false, array($cat_name));
 			trigger_error($this->user->lang['ACP_UB_CAT_DELETED'] . adm_back_link($this->u_action . "&amp;mode=categories"));
 		}
 		else
