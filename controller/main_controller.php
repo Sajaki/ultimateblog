@@ -155,7 +155,7 @@ class main_controller
 
 	public function search()
 	{
-		$this->search->search();
+		$this->search->blog_search();
 		// Generate the page template
 		return $this->helper->render('blog_search.html', $this->user->lang('BLOG_SEARCH'));
 	}

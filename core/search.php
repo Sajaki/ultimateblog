@@ -64,7 +64,7 @@ class search
 		$this->ub_rating_table	= $ub_rating_table;
 	}
 
-	function search()
+	function blog_search()
 	{
 		// Add search language
 		$this->user->add_lang('search');
