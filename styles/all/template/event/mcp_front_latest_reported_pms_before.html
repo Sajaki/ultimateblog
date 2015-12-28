@@ -1,0 +1,40 @@
+<!-- IF S_BLOG_REPORTS -->
+	<div class="panel">
+		<div class="inner">
+
+		<h3>{L_BLOG_REPORTS_LATEST}</h3>
+		<p>{BLOG_REPORTS_TOTAL}</p>
+
+		<!-- IF .blog_report -->
+			<ul class="topiclist two-long-columns">
+				<li class="header">
+					<dl>
+						<dt><div class="list-inner">{L_VIEW_DETAILS}</div></dt>
+						<dd class="moderation"><span>{L_BLOG_AND_REPORTER}</span></dd>
+					</dl>
+				</li>
+			</ul>
+			<ul class="topiclist cplist two-long-columns responsive-show-all">
+
+			<!-- BEGIN blog_report -->
+			<li class="row<!-- IF blog_report.S_ROW_COUNT is odd --> bg1<!-- ELSE --> bg2<!-- ENDIF -->">
+				<dl>
+					<dt>
+						<div class="list-inner">
+							<a href="{blog_report.U_DETAILS}" class="topictitle">Re: {blog_report.BLOG_SUBJECT}</a><br />
+							<span>{L_BLOG_POSTED_BY} {blog_report.AUTHOR_FULL} &raquo; {blog_report.POST_TIME}</span>
+						</div>
+					</dt>
+					<dd class="moderation">
+						<span>{L_BLOG_REPORTED_BY} {blog_report.REPORTER_FULL} {L_BLOG_ON} {blog_report.REPORT_TIME}<br />
+						{L_BLOG}{L_COLON} <a href="{blog_report.U_BLOG}">{blog_report.BLOG_SUBJECT}</a></span>
+					</dd>
+				</dl>
+			</li>
+			<!-- END blog_report -->
+			</ul>
+		<!-- ENDIF -->
+
+		</div>
+	</div>
+<!-- ENDIF -->

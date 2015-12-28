@@ -66,14 +66,19 @@ class listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return [
-			'core.user_setup'						=> 'set_blog_lang',
-			'core.page_header'						=> 'add_page_header_link',
-			'core.memberlist_view_profile'			=> 'viewprofile',
-			'core.viewonline_overwrite_location'	=> 'viewonline_page',
-			'core.permissions'						=> 'permissions',
+			'core.user_setup'							=> 'set_blog_lang',
+			'core.page_header'							=> 'add_page_header_link',
+			'core.memberlist_view_profile'				=> 'viewprofile',
+			'core.modify_mcp_modules_display_option'	=> 'mcp_modules_display',
+			'core.mcp_front_reports_count_query_before'	=> 'latest_blog_reports',
+			'core.viewonline_overwrite_location'		=> 'viewonline_page',
+			'core.permissions'							=> 'permissions',
 		];
 	}
 
+	/*
+	* Add Ultimate Blog language
+	*/
 	public function set_blog_lang($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];
@@ -84,6 +89,9 @@ class listener implements EventSubscriberInterface
 		$event['lang_set_ext'] = $lang_set_ext;
 	}
 
+	/*
+	* Add overall_header link to the blog page
+	*/
 	public function add_page_header_link($event)
 	{
 		if (!empty($this->config['ub_enabled']))
@@ -91,11 +99,16 @@ class listener implements EventSubscriberInterface
 			$this->template->assign_vars([
 				'S_BLOG_ENABLED'	=> true,
 				'S_BLOG_VIEW'		=> $this->auth->acl_get('u_blog_view'),
+
 				'U_BLOG'			=> $this->helper->route('posey_ultimateblog_blog'),
+				'U_BLOG_SEARCH'		=> $this->helper->route('posey_ultimateblog_search'),
 			]);
 		}
 	}
 
+	/*
+	* Add total blog posts and blog comments to the profile
+	*/
 	public function viewprofile($event)
 	{
 		// Return if Ultimate Blog is disabled
@@ -105,33 +118,121 @@ class listener implements EventSubscriberInterface
 		}
 
 		// Get Blog Post and Blog Comment count
-		$sql_ary = [
-			'SELECT'	=> 'COUNT(b.blog_id) as blog_count, COUNT(bc.comment_id) as comment_count',
-			'FROM'		=> [
-				$this->ub_blogs_table => 'b',
-			],
-
-			'LEFT_JOIN' => [
-				[
-					'FROM'	=> [$this->ub_comments_table => 'bc'],
-					'ON'	=> 'b.poster_id = bc.poster_id',
-				]
-			],
-
-			'WHERE'		=> 'b.poster_id = ' . (int) $event['member']['user_id'],
-		];
-
-		$sql = $this->db->sql_build_query('SELECT', $sql_ary);
+		$sql = 'SELECT COUNT(blog_id) AS blog_count
+			FROM ' . $this->ub_blogs_table . '
+			WHERE poster_id = ' . (int) $event['member']['user_id'];
 		$result = $this->db->sql_query($sql);
-		$row = $this->db->sql_fetchrow($result);
-		$this->db->sql_freeresult($result);
+		$total_blog_count = (int) $this->db->sql_fetchfield('blog_count');
+
+		$sql = 'SELECT COUNT(comment_id) AS comment_count
+			FROM ' . $this->ub_comments_table . '
+			WHERE poster_id = ' . (int) $event['member']['user_id'];
+		$result = $this->db->sql_query($sql);
+		$total_comment_count = (int) $this->db->sql_fetchfield('comment_count');
 
 		$this->template->assign_vars([
-			'BLOG_POSTS'	=> $row['blog_count'] > 0 ? $row['blog_count'] : '-',
-			'BLOG_COMMENTS' => $row['comment_count'] > 0 ? $row['comment_count'] : '-',
+			'BLOG_POSTS'	=> $total_blog_count > 0 ? $total_blog_count : '-',
+			'BLOG_COMMENTS' => $total_comment_count > 0 ? $total_comment_count : '-',
 		]);
 	}
 
+	/*
+	* Fix display for MCP Modules
+	*/
+	public function mcp_modules_display($event)
+	{
+		$module = $event['module'];
+		$mode = $event['mode'];
+
+		if ($mode == 'open' || $mode == 'closed' || $mode == 'details')
+		{
+			$module->set_display('pm_reports', 'pm_report_details', false);
+			$module->set_display('reports', 'report_details', false);
+		}
+
+		if ($mode == '' || $mode == 'reports' || $mode == 'reports_closed' || $mode == 'report_details' || $mode == 'pm_reports' || $mode == 'pm_reports_closed' || $mode == 'pm_report_details' || $mode == 'open' || $mode == 'closed')
+		{
+			$module->set_display('\posey\ultimateblog\mcp\main_module', 'details', false);
+		}
+	}
+
+	/*
+	* Display latest 5 blogs in MCP Front page
+	*/
+	public function latest_blog_reports($event)
+	{
+		if ($this->auth->acl_get('m_blog_reports') && $this->config['ub_enabled'] == 1)
+		{
+			$sql = 'SELECT COUNT(r.report_id) AS total
+					FROM ' . REPORTS_TABLE . ' r, ' . $this->ub_comments_table . ' c
+					WHERE r.post_id = 0
+						AND r.pm_id = 0
+						AND r.blog_comment_id = c.comment_id
+						AND r.report_closed = 0';
+			$result = $this->db->sql_query($sql);
+			$total = (int) $this->db->sql_fetchfield('total');
+			$this->db->sql_freeresult($result);
+
+			$this->template->assign_vars([
+				'BLOG_REPORTS_TOTAL'	=> $this->user->lang('BLOG_REPORTS_TOTAL', $total),
+				'S_BLOG_REPORTS'		=> true,
+			]);
+
+			if ($total)
+			{
+				$sql_ary = [
+					'SELECT'	=> 'r.report_id, r.report_time, c.post_time, b.blog_id, b.blog_subject, u.username, u.user_colour, u.user_id, u2.username as author_name, u2.user_colour as author_colour, u2.user_id as author_id',
+
+					'FROM'		=> [
+						REPORTS_TABLE				=> 'r',
+						$this->ub_comments_table	=> 'c',
+						USERS_TABLE					=> ['u', 'u2'],
+					],
+
+					'LEFT_JOIN'	=> [
+						[
+							'FROM'	=> [$this->ub_blogs_table => 'b'],
+							'ON'	=> 'b.blog_id = c.blog_id',
+						],
+					],
+
+					'WHERE'		=> 'r.blog_comment_id = c.comment_id
+						AND r.pm_id = 0
+						AND r.post_id = 0
+						AND r.report_closed = 0
+						AND r.user_id = u.user_id
+						AND c.poster_id = u2.user_id',
+
+					'ORDER_BY'	=> 'c.post_time DESC, c.comment_id DESC',
+				];
+
+				$sql = $this->db->sql_build_query('SELECT', $sql_ary);
+				$result = $this->db->sql_query_limit($sql, 5);
+
+				while ($row = $this->db->sql_fetchrow($result))
+				{
+					// Set report ID
+					$report_id = (int) $row['report_id'];
+
+					$this->template->assign_block_vars('blog_report', [
+						'AUTHOR_FULL'		=> get_username_string('full', $row['author_id'], $row['author_name'], $row['author_colour']),
+						'BLOG_SUBJECT'		=> $row['blog_subject'],
+						'POST_TIME'			=> $this->user->format_date($row['post_time']),
+						'REPORT_TIME'		=> $this->user->format_date($row['report_time']),
+						'REPORTER_FULL'		=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
+
+						'U_BLOG'			=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]),
+						'U_DETAILS'			=> append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=details&amp;id=$report_id"),
+					]);
+				}
+				$this->db->sql_freeresult($result);
+			}
+		}
+	}
+
+	/*
+	* Show who is where in viewonline page
+	*/
 	public function viewonline_page($event)
 	{
 		if ($event['on_page'][1] == 'app')
@@ -217,6 +318,9 @@ class listener implements EventSubscriberInterface
 		}
 	}
 
+	/*
+	* Assign permissions, their language and their category
+	*/
 	public function permissions($event)
 	{
 		$permissions = $event['permissions'];

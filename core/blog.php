@@ -17,6 +17,7 @@ class blog
 	protected $log;
 	protected $config;
 	protected $auth;
+	protected $notification_manager;
 	protected $helper;
 	protected $request;
 	protected $pagination;
@@ -26,6 +27,8 @@ class blog
 	protected $ub_cats_table;
 	protected $ub_comments_table;
 	protected $ub_rating_table;
+	protected $ub_watch_blog_table;
+	protected $ub_watch_cat_table;
 	protected $functions;
 
 	/**
@@ -38,6 +41,7 @@ class blog
 		\phpbb\log\log $log,
 		\phpbb\config\config $config,
 		\phpbb\auth\auth $auth,
+		\phpbb\notification\manager $notification_manager,
 		\phpbb\controller\helper $helper,
 		\phpbb\request\request $request,
 		\phpbb\pagination $pagination,
@@ -47,6 +51,8 @@ class blog
 		$ub_cats_table,
 		$ub_comments_table,
 		$ub_rating_table,
+		$ub_watch_blog_table,
+		$ub_watch_cat_table,
 		$functions)
 	{
 		$this->user		= $user;
@@ -55,6 +61,7 @@ class blog
 		$this->log		= $log;
 		$this->config	= $config;
 		$this->auth		= $auth;
+		$this->notification_manager = $notification_manager;
 		$this->helper	= $helper;
 		$this->request	= $request;
 		$this->pagination		= $pagination;
@@ -64,11 +71,25 @@ class blog
 		$this->ub_cats_table	= $ub_cats_table;
 		$this->ub_comments_table = $ub_comments_table;
 		$this->ub_rating_table	= $ub_rating_table;
-		$this->functions		= $functions;
+		$this->ub_watch_blog_table	= $ub_watch_blog_table;
+		$this->ub_watch_cat_table	= $ub_watch_cat_table;
+		$this->functions			= $functions;
 	}
 
 	function latest()
 	{
+		// When blog is disabled, redirect users back to the forum index
+		if ($this->config['ub_enabled'] == 0)
+		{
+			redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}"));
+		}
+
+		// Check if user can view blogs
+		if (!$this->auth->acl_get('u_blog_view'))
+		{
+			trigger_error($this->user->lang['AUTH_BLOG_VIEW'] . '<br><br>' . $this->user->lang('RETURN_INDEX', '<a href="' . append_sid("{$this->phpbb_root_path}index.{$this->php_ext}") . '">&laquo; ', '</a>'));
+		}
+
 		$start = $this->request->variable('start', 0);
 
 		// Get latest blogs
@@ -121,7 +142,14 @@ class blog
 			// Cut off blog text
 			if ($this->config['ub_cutoff'] != 0)
 			{
-				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . '<span class="blog-read-full"> ... <a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '">' . $this->user->lang['BLOG_READ_FULL'] . '</a></span>' : $text;
+				if ($this->config['ub_show_desc'] == 1)
+				{
+					$text = (strlen($text) > $this->config['ub_cutoff']) ? $row['blog_description'] . '<span class="blog-read-full"> <br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '">' . $this->user->lang['BLOG_READ_FULL'] . '</a></span>' : $text;
+				}
+				else
+				{
+					$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . '<span class="blog-read-full"> ... <a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '">' . $this->user->lang['BLOG_READ_FULL'] . '</a></span>' : $text;
+				}
 			}
 
 			$this->template->assign_block_vars('blogs', [
@@ -143,9 +171,16 @@ class blog
 		// Get Sidebar
 		$this->functions->sidebar();
 
+		// Check subscription
+		$subscribed = $this->user->data['ub_watch_all'] == 1 ? true : false;
+
 		$this->template->assign_vars([
-			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
-			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
+			'S_BLOG_CAN_ADD'		=> $this->auth->acl_get('u_blog_make'),
+			'S_BLOG_SUBSCRIBED_ALL'	=> $subscribed,
+			'S_IN_BLOG_ALL'			=> true,
+
+			'U_BLOG_ADD'			=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
+			'U_BLOG_SUBSCRIBE_ALL'	=> !$subscribed ? $this->helper->route('posey_ultimateblog_blog', ['action' => 'subscribe', 'mode' => 'all']) : $this->helper->route('posey_ultimateblog_blog', ['action' => 'unsubscribe', 'mode' => 'all']),
 		]);
 
 		// Assign breadcrumb template vars
@@ -155,13 +190,7 @@ class blog
 		]);
 
 		// Count blogs
-		$sql = 'SELECT *
-			FROM ' . $this->ub_blogs_table . '
-			ORDER BY blog_id ASC';
-		$result_total = $this->db->sql_query($sql);
-		$row_total = $this->db->sql_fetchrowset($result_total);
-		$total_blog_count = (int) sizeof($row_total);
-		$this->db->sql_freeresult($result_total);
+		$total_blog_count = (int) $this->db->get_row_count($this->ub_blogs_table);
 
 		//Start pagination
 		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_blog'), 'pagination', 'start', $total_blog_count, $this->config['ub_blogs_per_page'], $start);
@@ -223,6 +252,39 @@ class blog
 
 				// Add it to the log
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_ADDED', false, [$blog_row['blog_subject']]);
+
+				// Get user_ids of people who will receive a notification
+				$user_id_ary = [];
+
+				$sql = 'SELECT u.user_id
+						FROM ' . USERS_TABLE . ' u
+						LEFT JOIN ' . $this->ub_watch_cat_table . ' c
+							ON u.user_id = c.user_id
+						WHERE c.cat_id = ' . (int) $blog_row['cat_id'] . '
+							OR u.ub_watch_all = 1
+						GROUP BY u.user_id';
+				$result = $this->db->sql_query($sql);
+
+				while ($row = $this->db->sql_fetchrow($result))
+				{
+					$user_id_ary[] = $row['user_id'];
+				}
+
+				$this->db->sql_freeresult($result);
+
+				// Store the notification data we will use in an array
+				$data = array(
+					'blog_title'	=> $blog_row['blog_subject'],
+					'poster_id'		=> (int) $this->user->data['user_id'],
+					'parent_id'		=> (int) $blog_row['cat_id'],
+					'child_id'		=> (int) $blog_id,
+					'user_ids'		=> $user_id_ary,
+					'blog_id'		=> (int) $blog_id,
+					'mode'			=> 'blog',
+				);
+
+				// Create the notification
+				$this->notification_manager->add_notifications('posey.ultimateblog.notification.type.subscribe', $data);
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_ADDED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => $blog_id]) . '">' . $this->user->lang['BLOG_VIEW'] . ' &raquo;</a>');
@@ -390,7 +452,7 @@ class blog
 				$this->db->sql_query($sql);
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_EDITED', time(), array($blog_row['blog_subject']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_EDITED', false, array($blog_row['blog_subject']));
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_EDITED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '">' . $this->user->lang['BLOG_VIEW'] . ' &raquo;</a>');
@@ -559,7 +621,7 @@ class blog
 			$this->db->sql_query($sql);
 
 			// Add it to the log
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_DELETE', time(), array($blog_name));
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_DELETED', false, array($blog_name));
 
 			// Send success message
 			trigger_error($this->user->lang['BLOG_DELETED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog') . '">&laquo; ' . $this->user->lang['BLOG_BACK'] . '</a>');
@@ -649,6 +711,17 @@ class blog
 		$bbcode_options =	(($blog['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
 							(($blog['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
 							(($blog['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
+		$blog_text = generate_text_for_display($blog['blog_text'], $blog['bbcode_uid'], $blog['bbcode_bitfield'], $bbcode_options);
+
+		// Do we come from search, and want to highlight something?
+		$keyw = $this->request->variable('hilit', '');
+		$kw = explode(' ', $keyw);
+
+		foreach($kw as $keyword)
+		{
+			$blog_text = str_replace($keyword, '<span class="posthilit">' . $keyword . '</span>', $blog_text);
+			$blog_subject = str_replace($keyword, '<span class="posthilit">' . $keyword . '</span>', $blog['blog_subject']);
+		}
 
 		// Get Sidebar
 		$this->functions->sidebar();
@@ -657,10 +730,13 @@ class blog
 		// If he has already rated, grab the rating
 		$rating = $this->has_rated($blog['blog_id']);
 
+		// Check if user is subscribed to this blog
+		$subscribed = $this->functions->check_subscription('blog', (int) $blog['blog_id']);
+
 		$this->template->assign_vars([
 			'BLOG_ID'			=> $blog['blog_id'],
-			'BLOG_SUBJECT'		=> $blog['blog_subject'],
-			'BLOG_TEXT'			=> generate_text_for_display($blog['blog_text'], $blog['bbcode_uid'], $blog['bbcode_bitfield'], $bbcode_options),
+			'BLOG_SUBJECT'		=> $blog_subject,
+			'BLOG_TEXT'			=> $blog_text,
 			'BLOG_DESCRIPTION'	=> $blog['blog_description'],
 			'BLOG_POSTER'		=> get_username_string('full', $blog['user_id'], $blog['username'], $blog['user_colour']),
 			'BLOG_POST_TIME'	=> $this->user->format_date($blog['post_time']),
@@ -677,21 +753,29 @@ class blog
 			'CAT_NAME'		=> $cat_name,
 			'CAT_LINK'		=> $this->helper->route('posey_ultimateblog_category', ['cat_id' => (int) $blog['cat_id']]),
 
+			'MANAGE_REPORTS'	=> $this->auth->acl_get('m_blog_reports'),
+
 			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
 			'S_BLOG_CAN_DELETE'	=> $this->auth->acl_get('m_blog_delete'),
 			'S_BLOG_CAN_EDIT'	=> (($this->auth->acl_get('u_blog_edit') && $this->user->data['user_id'] == $blog['user_id']) || $this->auth->acl_get('m_blog_edit')) ? true : false,
 			'S_BLOG_CAN_RATE'	=> ($this->auth->acl_get('u_blog_rate') && !$rating),
-			'S_BLOG_RATED'		=> $blog['total_rate_users'] > 0 ? true : false,
-			'S_COMMENT_CAN_ADD'	=> $this->auth->acl_get('u_blog_comment_make'),
-			'S_COMMENT_CAN_DEL'	=> $this->auth->acl_get('m_blog_comment_delete'),
+			'S_BLOG_RATED'		=> $rate['total_rate_users'] > 0 ? true : false,
+			'S_BLOG_SUBSCRIBED'	=> $subscribed,
+			'S_COMMENT_CAN_ADD'		=> $this->auth->acl_get('u_blog_comment_make'),
+			'S_COMMENT_CAN_DELETE'	=> $this->auth->acl_get('m_blog_comment_delete'),
+			'S_COMMENT_CAN_EDIT'	=> $this->auth->acl_get('m_blog_comment_edit'),
+			'S_COMMENT_CAN_REPORT'	=> $this->auth->acl_get('u_blog_comment_report'),
 			'S_EDITED'			=> $blog['blog_edit_count'] > 0 ? true : false,
 			'S_EDIT_LOCKED'		=> $blog['blog_edit_locked'] == 1 ? true : false,
 			'S_ENABLE_COMMENTS'	=> $blog['enable_comments'] == 1 ? true : false,
+			'S_IN_BLOG'			=> true,
 
 			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
 			'U_BLOG_DELETE'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'delete', 'blog_id' => (int) $blog['blog_id']]),
 			'U_BLOG_EDIT'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'edit', 'blog_id' => (int) $blog['blog_id']]),
 			'U_BLOG_RATE'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'rate', 'blog_id' => (int) $blog['blog_id']]),
+			'U_BLOG_SUBSCRIBE'	=> !$subscribed ? $this->helper->route('posey_ultimateblog_blog', ['action' => 'subscribe', 'mode' => 'blog', 'id' => (int) $blog['blog_id']]) : $this->helper->route('posey_ultimateblog_blog', ['action' => 'unsubscribe', 'mode' => 'blog', 'id' => (int) $blog['blog_id']]),
+			'U_MCP'				=> ($this->auth->acl_get('m_') || $this->auth->acl_getf_global('m_')) ? append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}", 'i=main&amp;mode=front', true, $this->user->session_id) : '',
 		]);
 
 		// Grab comments for this blog
@@ -717,15 +801,38 @@ class blog
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
+			// Get report ID if comment is reported
+			if ($row['comment_reported'] == 1)
+			{
+				$s = 'SELECT report_id
+					FROM ' . REPORTS_TABLE . '
+					WHERE blog_comment_id = ' . (int) $row['comment_id'];
+				$res = $this->db->sql_query($s);
+				$report_id = (int) $this->db->sql_fetchfield('report_id');
+				$this->db->sql_freeresult($res);
+			}
+
+			// Do we need to highlight
+			$comment_text = generate_text_for_display($row['comment_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $row['bbcode_options']);
+
+			foreach($kw as $keyword)
+			{
+				$comment_text = str_replace($keyword, '<span class="posthilit">' . $keyword . '</span>', $comment_text);
+			}
+
 			$this->template->assign_block_vars('comments', [
 				'ID'		=> $row['comment_id'],
-				'TEXT'		=> generate_text_for_display($row['comment_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $row['bbcode_options']),
+				'TEXT'		=> $comment_text,
 				'POST_TIME'	=> $this->user->format_date($row['post_time']),
 				'POSTER'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
 				'AVATAR'	=> phpbb_get_user_avatar($row),
 
+				'S_REPORTED'	=> $row['comment_reported'] == 1 ? true : false,
+
 				'U_COMMENT_DELETE'	=> $this->helper->route('posey_ultimateblog_comment', ['blog_id' => (int) $blog_id, 'comment_id' => (int) $row['comment_id'], 'action' => 'delete']),
 				'U_COMMENT_EDIT'	=> $this->helper->route('posey_ultimateblog_comment', ['blog_id' => (int) $blog_id, 'comment_id' => (int) $row['comment_id'], 'action' => 'edit']),
+				'U_COMMENT_REPORT'	=> $this->helper->route('posey_ultimateblog_comment', ['blog_id' => (int) $blog_id, 'comment_id' => (int) $row['comment_id'], 'action' => 'report']),
+				'U_COMMENT_REPORT_DETAILS'	=> $row['comment_reported'] == 1 ? append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=details&amp;id=$report_id") : '',
 			]);
 		}
 		$this->db->sql_freeresult($result);
@@ -778,6 +885,36 @@ class blog
 				$sql = 'INSERT INTO ' . $this->ub_comments_table . ' ' . $this->db->sql_build_array('INSERT', $sql_ary);
 				$this->db->sql_query($sql);
 				$comment_id = $this->db->sql_nextid();
+
+				// Get user_ids of people who will receive a notification
+				$user_id_ary = [];
+
+				$sql = 'SELECT user_id
+						FROM ' . $this->ub_watch_blog_table . '
+						WHERE blog_id = ' . (int) $blog_id . '
+						GROUP BY user_id';
+				$result = $this->db->sql_query($sql);
+
+				while ($row = $this->db->sql_fetchrow($result))
+				{
+					$user_id_ary[] = $row['user_id'];
+				}
+
+				$this->db->sql_freeresult($result);
+
+				// Store the notification data we will use in an array
+				$data = array(
+					'blog_title'	=> $blog['blog_subject'],
+					'poster_id'		=> (int) $this->user->data['user_id'],
+					'parent_id'		=> (int) $blog_id,
+					'child_id'		=> (int) $comment_id,
+					'user_ids'		=> $user_id_ary,
+					'blog_id'		=> (int) $blog_id,
+					'mode'			=> 'comment',
+				);
+
+				// Create the notification
+				$this->notification_manager->add_notifications('posey.ultimateblog.notification.type.subscribe', $data);
 
 				// Success! Redirect to the comment
 				redirect($this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '#c' . $comment_id);

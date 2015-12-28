@@ -50,8 +50,8 @@
 			<legend>{L_ACP_ULTIMATEBLOG_SETTINGS_TITLE}</legend>
 			<dl>
 				<dt><label>{L_ACP_UB_SETTINGS_ENABLE}{L_COLON}</label></dt>
-				<dd><label><input type="radio" class="radio" name="ub_enabled" value="1"<!-- IF UB_ENABLED --> id="points_enable" checked="checked" <!-- ENDIF --> /> {L_YES}</label>
-					<label><input type="radio" class="radio" name="ub_enabled" value="0"<!-- IF not UB_ENABLED --> id="points_enable" checked="checked" <!-- ENDIF --> /> {L_NO}</label></dd>
+				<dd><label><input type="radio" class="radio" name="ub_enabled" value="1"<!-- IF UB_ENABLED --> checked="checked" <!-- ENDIF --> /> {L_YES}</label>
+					<label><input type="radio" class="radio" name="ub_enabled" value="0"<!-- IF not UB_ENABLED --> checked="checked" <!-- ENDIF --> /> {L_NO}</label></dd>
 			</dl>
 			<dl>
 				<dt><label for="ub_latest_blogs">{L_ACP_UB_SETTINGS_BLOGS_PER_PAGE}{L_COLON}</label><br />{L_ACP_UB_SETTINGS_BLOGS_PER_PAGE_EXPLAIN}</dt>
@@ -60,6 +60,11 @@
 			<dl>
 				<dt><label for="ub_cutoff">{L_ACP_UB_SETTINGS_CUTOFF}{L_COLON}</label><br />{L_ACP_UB_SETTINGS_CUTOFF_EXPLAIN}</dt>
 				<dd><input type="text" id="ub_cutoff" name="ub_cutoff" value="{UB_CUTOFF}" maxlength="4" size="5" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="ub_show_desc">{L_ACP_UB_SETTINGS_SHOW_DESC}{L_COLON}</label><br />{L_ACP_UB_SETTINGS_SHOW_DESC_EXPLAIN}</dt>
+				<dd><label><input type="radio" class="radio" name="ub_show_desc" value="1"<!-- IF UB_SHOW_DESC --> checked="checked" <!-- ENDIF --> /> {L_YES}</label>
+					<label><input type="radio" class="radio" name="ub_show_desc" value="0"<!-- IF not UB_SHOW_DESC --> checked="checked" <!-- ENDIF --> /> {L_NO}</label></dd>
 			</dl>
 		</fieldset>
 		<fieldset class="submit-buttons">

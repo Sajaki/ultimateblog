@@ -30,3 +30,11 @@ posey_ultimateblog_archive:
     requirements:
         "year": \d+
         "month": \d+
+
+posey_ultimateblog_search:
+    path: /blog/search
+    defaults: { _controller: posey.ultimateblog.controller:search }
+
+posey_ultimateblog_subscribe:
+    path: /blog/subscribe
+    defaults: { _controller: posey.ultimateblog.controller:subscribe }

@@ -17,7 +17,6 @@ services:
            - '@pagination'
            - '@ext.manager'
            - '%core.root_path%'
-           - '%core.php_ext%'
            - '%posey.ultimateblog.table.ub.blogs%'
            - '%posey.ultimateblog.table.ub.cats%'
 
@@ -33,6 +32,25 @@ services:
            - '@posey.ultimateblog.core.blog'
            - '@posey.ultimateblog.core.category'
            - '@posey.ultimateblog.core.functions'
+           - '@posey.ultimateblog.core.search'
+
+    posey.ultimateblog.mcp.controller:
+        class: posey\ultimateblog\controller\mcp_controller
+        arguments:
+           - '@user'
+           - '@template'
+           - '@dbal.conn'
+           - '@log'
+           - '@config'
+           - '@auth'
+           - '@controller.helper'
+           - '@request'
+           - '@pagination'
+           - '%core.root_path%'
+           - '%core.php_ext%'
+           - '%posey.ultimateblog.table.ub.blogs%'
+           - '%posey.ultimateblog.table.ub.cats%'
+           - '%posey.ultimateblog.table.ub.comments%'
 
     posey.ultimateblog.listener:
         class: posey\ultimateblog\event\listener
@@ -53,6 +71,25 @@ services:
         tags:
            - { name: event.listener }
 
+    posey.ultimateblog.notification.type.subscribe:
+        class: posey\ultimateblog\notification\subscribe
+        scope: prototype # scope MUST be prototype for this to work!
+        arguments:
+            - '@user_loader'
+            - '@dbal.conn'
+            - '@cache.driver'
+            - '@user'
+            - '@auth'
+            - '@config'
+            - '@controller.helper'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '%tables.notification_types%'
+            - '%tables.notifications%'
+            - '%tables.user_notifications%'
+        tags:
+            - { name: notification.type }
+
     posey.ultimateblog.core.blog:
         class: posey\ultimateblog\core\blog
         arguments:
@@ -62,6 +99,7 @@ services:
            - '@log'
            - '@config'
            - '@auth'
+           - '@notification_manager'
            - '@controller.helper'
            - '@request'
            - '@pagination'
@@ -71,6 +109,8 @@ services:
            - '%posey.ultimateblog.table.ub.cats%'
            - '%posey.ultimateblog.table.ub.comments%'
            - '%posey.ultimateblog.table.ub.rating%'
+           - '%posey.ultimateblog.table.ub.watch.blog%'
+           - '%posey.ultimateblog.table.ub.watch.cat%'
            - '@posey.ultimateblog.core.functions'
 
     posey.ultimateblog.core.category:
@@ -94,6 +134,27 @@ services:
 
     posey.ultimateblog.core.functions:
         class: posey\ultimateblog\core\functions
+        arguments:
+            - '@template'
+            - '@dbal.conn'
+            - '@controller.helper'
+            - '@user'
+            - '@config'
+            - '@auth'
+            - '@log'
+            - '@request'
+            - '@pagination'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '%posey.ultimateblog.table.ub.blogs%'
+            - '%posey.ultimateblog.table.ub.cats%'
+            - '%posey.ultimateblog.table.ub.comments%'
+            - '%posey.ultimateblog.table.ub.rating%'
+            - '%posey.ultimateblog.table.ub.watch.blog%'
+            - '%posey.ultimateblog.table.ub.watch.cat%'
+
+    posey.ultimateblog.core.search:
+        class: posey\ultimateblog\core\search
         arguments:
             - '@template'
             - '@dbal.conn'

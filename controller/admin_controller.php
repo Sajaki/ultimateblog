@@ -23,7 +23,6 @@ class admin_controller
 	protected $pagination;
 	protected $phpbb_ext_manager;
 	protected $phpbb_root_path;
-	protected $phpbb_admin_path;
 	protected $ub_blogs_table;
 	protected $ub_cats_table;
 
@@ -43,7 +42,6 @@ class admin_controller
 		\phpbb\pagination $pagination,
 		\phpbb\extension\manager $phpbb_ext_manager,
 		$phpbb_root_path,
-		$phpbb_admin_path,
 		$ub_blogs_table,
 		$ub_cats_table)
 	{
@@ -59,7 +57,6 @@ class admin_controller
 		$this->pagination		= $pagination;
 		$this->phpbb_ext_manager = $phpbb_ext_manager;
 		$this->phpbb_root_path	= $phpbb_root_path;
-		$this->phpbb_admin_path	= $phpbb_admin_path;
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
 	}
@@ -89,6 +86,7 @@ class admin_controller
 				$ub_enabled 		= $this->request->variable('ub_enabled', 1);
 				$ub_blogs_per_page	= $this->request->variable('ub_blogs_per_page', 5);
 				$ub_cutoff 			= $this->request->variable('ub_cutoff', 1500);
+				$ub_show_desc		= $this->request->variable('ub_show_desc', 1);
 
 				if ($ub_enabled != $this->config['ub_enabled'])
 				{
@@ -102,12 +100,16 @@ class admin_controller
 				{
 					$this->config->set('ub_cutoff', $ub_cutoff);
 				}
-
-				// Show success message
-				trigger_error($this->user->lang('ACP_UB_SETTINGS_SAVED') . adm_back_link($this->u_action));
+				if ($ub_show_desc != $this->config['ub_show_desc'])
+				{
+					$this->config->set('ub_show_desc', $ub_show_desc);
+				}
 
 				// Add to the log
 				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_SETTINGS_CHANGED');
+
+				// Show success message
+				trigger_error($this->user->lang('ACP_UB_SETTINGS_SAVED') . adm_back_link($this->u_action));
 			}
 		}
 		else
@@ -116,6 +118,7 @@ class admin_controller
 				'UB_ENABLED'		=> ($this->config['ub_enabled']) ? true : false,
 				'UB_BLOGS_PER_PAGE'	=> $this->config['ub_blogs_per_page'],
 				'UB_CUTOFF'			=> $this->config['ub_cutoff'],
+				'UB_SHOW_DESC'		=> $this->config['ub_show_desc'],
 				'S_UB_MAIN'			=> true,
 			));
 
@@ -244,7 +247,7 @@ class admin_controller
 				$this->db->sql_query($sql);
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_ADD', time(), array($cat_row['cat_name']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_ADD', false, array($cat_row['cat_name']));
 
 				// Send success message
 				trigger_error($this->user->lang['ACP_UB_CAT_ADDED'] . adm_back_link($this->u_action));
@@ -303,7 +306,7 @@ class admin_controller
 				$this->db->sql_query($sql);
 
 				// Add it to the logg
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_EDIT', time(), array($cat_row['cat_name']));
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_EDIT', false, array($cat_row['cat_name']));
 
 				// Send success message
 				trigger_error($this->user->lang['ACP_UB_CAT_EDITED'] . adm_back_link($this->u_action));
@@ -373,7 +376,7 @@ class admin_controller
 					SET cat_id = 1
 					WHERE cat_id = ' . (int) $cat_id;
 			$this->db->sql_query($sql);
-			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_DELETE', time(), array($cat_name));
+			$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_UB_CAT_DELETE', false, array($cat_name));
 			trigger_error($this->user->lang['ACP_UB_CAT_DELETED'] . adm_back_link($this->u_action . "&amp;mode=categories"));
 		}
 		else

@@ -65,8 +65,10 @@ $lang = array_merge($lang, array(
 	'ACP_UB_SETTINGS_DISABLED'			=> 'Ultimate Blog is currently disabled!',
 	'ACP_UB_SETTINGS_BLOGS_PER_PAGE'	=> 'Blogs per page',
 	'ACP_UB_SETTINGS_BLOGS_PER_PAGE_EXPLAIN'	=> 'The amount of blogs that should be displayed per page.',
-	'ACP_UB_SETTINGS_CUTOFF'			=> 'Latest Blog Cut Off',
-	'ACP_UB_SETTINGS_CUTOFF_EXPLAIN'	=> 'Enter after how many characters the blog post should be cut off for display in the Latest Blogs.<br>Users will then have to visit the blog to read the full story.<br>Set to <strong>0</strong> to display the full blog.',
+	'ACP_UB_SETTINGS_CUTOFF'			=> 'Blog text cut off',
+	'ACP_UB_SETTINGS_CUTOFF_EXPLAIN'	=> 'Enter after how many characters the blog post should be cut off for display in overview pages.<br>Users will then have to visit the blog to read the full story.<br>Set to <strong>0</strong> to display the full blog.',
+	'ACP_UB_SETTINGS_SHOW_DESC'			=> 'Show blog description',
+	'ACP_UB_SETTINGS_SHOW_DESC_EXPLAIN'	=> 'This will show the blog description instead of the cut off text, when the cut off limit has been reached.',
 
 	'LOG_UB_SETTINGS_CHANGED'	=> 'Ultimate Blog Settings have been changed',
 	'LOG_UB_CAT_ADD'			=> 'Ultimate Blog Category has been created: %1$s',

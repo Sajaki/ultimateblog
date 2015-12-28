@@ -20,6 +20,7 @@ class main_controller
 	protected $blog;
 	protected $category;
 	protected $functions;
+	protected $search;
 
 	/**
 	* Constructor
@@ -33,7 +34,8 @@ class main_controller
 		$php_ext,
 		$blog,
 		$category,
-		$functions)
+		$functions,
+		$search)
 	{
 		$this->user		= $user;
 		$this->config	= $config;
@@ -44,6 +46,7 @@ class main_controller
 		$this->blog				= $blog;
 		$this->category			= $category;
 		$this->functions		= $functions;
+		$this->search			= $search;
 	}
 
 	public function blog()
@@ -79,6 +82,16 @@ class main_controller
 				$this->blog->rate($blog_id);
 			break;
 
+			case 'subscribe':
+				$mode = $this->request->variable('mode', 'all');
+				$this->functions->subscribe($mode);
+			break;
+
+			case 'unsubscribe':
+				$mode = $this->request->variable('mode', 'all');
+				$this->functions->unsubscribe($mode);
+			break;
+
 			default:
 				$this->blog->latest();
 				// Generate the page template
@@ -110,6 +123,12 @@ class main_controller
 			case 'delete':
 				$this->functions->comment_delete($blog_id, $comment_id);
 			break;
+
+			case 'report':
+				$this->functions->comment_report($blog_id, $comment_id);
+				// Generate the page template
+				return $this->helper->render('report_body.html', $this->user->lang('BLOG_COMMENT_REPORT'));
+			break;
 		}
 	}
 
@@ -132,5 +151,12 @@ class main_controller
 		$this->functions->archive($year, $month);
 		// Generate the page template
 		return $this->helper->render('archive.html');
+	}
+
+	public function search()
+	{
+		$this->search->search();
+		// Generate the page template
+		return $this->helper->render('blog_search.html', $this->user->lang('BLOG_SEARCH'));
 	}
 }

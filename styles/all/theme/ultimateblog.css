@@ -87,6 +87,14 @@
 .blog-text {
 	font-size: 1.1em;
 	clear: left;
+	overflow: hidden;
+}
+
+.blog-text img, .blog-comment-text img {
+	max-width: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 .blog-add {
@@ -141,9 +149,10 @@
 }
 
 .blog-comment-text {
-	display: inline-block;
 	width: 84%;
 	float: left;
+	overflow: hidden;
+	background-color: inherit;
 }
 
 .blog-comment-add {

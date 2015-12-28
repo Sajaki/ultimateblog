@@ -1,0 +1,27 @@
+<h2 class="solo">{SEARCH_RESULTS_COUNT}</h2>
+
+<!-- BEGIN results -->
+	<div class="post bg<!-- IF results.S_ROW_COUNT is odd -->1<!-- ELSE -->2<!-- ENDIF -->">
+		<div class="inner">
+			<dl class="postprofile">
+				<dt class="author">by {results.AUTHOR}</dt>
+				<dd class="search-result-date">{results.TIME}</dd>
+				<dd>Category: <a href="{results.U_CAT}">{results.CAT}</a></dd>
+				<dd>Blog: <a href="{results.U_BLOG}">{results.SUBJECT}</a></dd>
+			</dl>
+
+			<div class="postbody">
+				<h3><!-- IF results.S_IS_COMMENT --><a href="{results.U_COMMENT}">Re: <!-- ELSE --><a href="{results.U_BLOG}"><!-- ENDIF -->{results.SUBJECT}</a></h3>
+				<div class="content">{results.TEXT}</div>
+			</div>
+
+			<ul class="searchresults">
+				<!-- IF results.S_IS_COMMENT -->
+					<li><a href="{results.U_COMMENT}" class="arrow-right">Jump to comment</a></li>
+				<!-- ELSE -->
+					<li><a href="{results.U_BLOG}" class="arrow-right">Jump to blog</a></li>
+				<!-- ENDIF -->
+			</ul>
+		</div>
+	</div>
+<!-- END results -->

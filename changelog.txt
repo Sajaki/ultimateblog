@@ -1,15 +1,15 @@
-────────────────────▄▄▄▄				/*************************************************************************************\
-────────────────▄▄█▀▀──▀▀█▄				*	@package phpBB Extension - Ultimate Blog
-─────────────▄█▀▀─────────▀▀█▄			*	@copyright (c) 2015 posey
-────────────▄█▀──▄▄▄▄▄▄──────▀█			\	@license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
-────────────█───█▌────▀▀█▄─────█		 *************************************************************************************/
+────────────────────▄▄▄▄				**************************************************************************************\
+────────────────▄▄█▀▀──▀▀█▄				|	@package phpBB Extension - Ultimate Blog
+─────────────▄█▀▀─────────▀▀█▄			|	@copyright (c) 2015 posey
+────────────▄█▀──▄▄▄▄▄▄──────▀█			|	@license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
+────────────█───█▌────▀▀█▄─────█		**************************************************************************************/
 ────────────█──▄█────────▀▀▀█──█
 ────────────█──█──▀▀▀──▀▀▀▄─▐──█			namespace posey\ultimateblog\changelog.txt
 ────────────█──▌────────────▐──█
 ────────────█──▌─▄▀▀▄───────▐──█			class changelog
 ───────────█▀▌█──▄▄▄───▄▀▀▄─▐──█			{
 ───────────▌─▀───█▄█▌─▄▄▄────█─█				LATEST VERSION:
-───────────▌──────▀▀──█▄█▌────█						1.1.0
+───────────▌──────▀▀──█▄█▌────█						1.2.0
 ───────────█───────────▀▀─────▐
 ────────────█──────▌──────────█					public function keep_track_of_changes()
 ────────────██────█──────────█					{
@@ -20,26 +20,26 @@
 ─────────────█▀█▄▄──▄▄▄▄▄█▄▄▄▄▄
 ───────────▄██▄──▀▀▀█─────────█						-=[ v.1.1.0 ]=-
 ──────────██▄─█▄────█─────────█
-───▄▄▄▄███──█▄─█▄───█─────────██▄▄▄					# [ACP] Ultimate Blog Settings: Added Version Check
-▄█▀▀────█────█──█▄──█▓▓▓▓▓▓▓▓▓█───▀▀▄				# [ACP] Ultimate Blog Settings: Adjusted Cutoff Language
+───▄▄▄▄███──█▄─█▄───█─────────██▄▄▄					# [CATEGORY] Fixed blog link, missing closing " in href
+▄█▀▀────█────█──█▄──█▓▓▓▓▓▓▓▓▓█───▀▀▄				# [BLOG ADD] Fixed hard coded language
 █──────█─────█───████▓▓▓▓▓▓▓▓▓█────▀█				# [PROFILE] Added blog posts and blog comments count
-█──────█─────█───█████▓▓▓▓▓▓▓█──────█				# [CATEGORY] Fixed blog link, missing closing " in href
+█──────█─────█───█████▓▓▓▓▓▓▓█──────█				# [HEADER] Added 'can_view_blog' permission to Nav Bar link
 █─────█──────█───███▀▀▀▀█▓▓▓█───────█				# [BLOGS] Fixed 'Read full blog' link
-█────█───────█───█───▄▄▄▄████───────█				# [BLOG ADD] Fixed hard coded language
-█────█───────█──▄▀───────────█──▄───█				# [BLOG] Fixed DateTime::__construct() error (YAY!)
-█────█───────█─▄▀─────█████▀▀▀─▄█───█				# [HEADER] Added 'can_view_blog' permission to Nav Bar link
+█────█───────█───█───▄▄▄▄████───────█				# [BLOG] Fixed DateTime::__construct() error (YAY!)
+█────█───────█──▄▀───────────█──▄───█				# [ACP] Ultimate Blog Settings: Added Version Check
+█────█───────█─▄▀─────█████▀▀▀─▄█───█				# [ACP] Ultimate Blog Settings: Adjusted Cutoff Language
 █────█───────█▄▀────────█─█────█────█
 █────█───────█▀───────███─█────█────█
-█─────█────▄█▀──────────█─█────█────█
+█─────█────▄█▀──────────█─█────█────█				-=[ v1.2.0 ]=-
 █─────█──▄██▀────────▄▀██─█▄───█────█
-█────▄███▀─█───────▄█─▄█───█▄──█────█
-█─▄██▀──█──█─────▄███─█─────█──█────█
-██▀────▄█───█▄▄▄█████─▀▀▀▀█▀▀──█────█
-█──────█────▄▀──█████─────█────▀█───█
-───────█──▄█▀───█████─────█─────█───█
-──────▄███▀─────▀███▀─────█─────█───█
-─────────────────────────────────────
-▀█▀─█▀▄─█─█─█▀────▄▀▀─▀█▀─▄▀▄─█▀▄─█─█
-─█──█▄▀─█─█─█▀────▀▀█──█──█─█─█▄▀─█▄█
+█────▄███▀─█───────▄█─▄█───█▄──█────█				# [SUBSCRIBE] Added subscribe function for all blogs, category, specific blog
+█─▄██▀──█──█─────▄███─█─────█──█────█				# [PROFILE] Fixed Viewprofile Data
+██▀────▄█───█▄▄▄█████─▀▀▀▀█▀▀──█────█				# [COMMENT] Fixed BBCodes and Smilies for editing
+█──────█────▄▀──█████─────█────▀█───█				# [IMAGES] Fixed image resizing
+───────█──▄█▀───█████─────█─────█───█				# [REPORT] Added fully integrated report system
+──────▄███▀─────▀███▀─────█─────█───█				# [SEARCH] Added basic blog search system
+─────────────────────────────────────				# [BLOGS] Show description instead of cut off text
+▀█▀─█▀▄─█─█─█▀────▄▀▀─▀█▀─▄▀▄─█▀▄─█─█				# [ACP] Added option to use Blog Description instead of cutoff
+─█──█▄▀─█─█─█▀────▀▀█──█──█─█─█▄▀─█▄█				# [JS] Moved JavaScript to overall_footer_after
 ─▀──▀─▀─▀▀▀─▀▀────▀▀───▀───▀──▀─▀─▄▄█
 ─────────────────────────────────────

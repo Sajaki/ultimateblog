@@ -69,7 +69,7 @@ class category
 		// When blog is disabled, redirect users back to the forum index
 		if ($this->config['ub_enabled'] == 0)
 		{
-			redirect(append_sid("{$this->root_path}index.{$this->php_ext}"));
+			redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}"));
 		}
 
 		// Check if user can view blogs
@@ -139,19 +139,20 @@ class category
 			]);
 		}
 
+		// Check subscription
+		$subscribed = $this->user->data['ub_watch_all'] == 1 ? true : false;
+
 		$this->template->assign_vars([
-			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
-			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
+			'S_BLOG_CAN_ADD'		=> $this->auth->acl_get('u_blog_make'),
+			'S_BLOG_SUBSCRIBED_ALL'	=> $subscribed,
+			'S_IN_BLOG_ALL'			=> true,
+
+			'U_BLOG_ADD'			=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
+			'U_BLOG_SUBSCRIBE_ALL'	=> !$subscribed ? $this->helper->route('posey_ultimateblog_blog', ['action' => 'subscribe', 'mode' => 'all']) : $this->helper->route('posey_ultimateblog_blog', ['action' => 'unsubscribe', 'mode' => 'all']),
 		]);
 
 		// Count categories
-		$sql = 'SELECT *
-			FROM ' . $this->ub_cats_table . '
-			ORDER BY cat_id ASC';
-		$result_total = $this->db->sql_query($sql);
-		$row_total = $this->db->sql_fetchrowset($result_total);
-		$total_count = (int) sizeof($row_total);
-		$this->db->sql_freeresult($result_total);
+		$total_count = (int) $this->db->get_row_count($this->ub_cats_table);
 
 		//Start pagination
 		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_categories'), 'pagination', 'start', $total_count, $this->config['posts_per_page'], $start);
@@ -193,7 +194,7 @@ class category
 				]
 			],
 
-			'WHERE'		=> 'b.cat_id = ' . (int) $cat_id . ' AND c.cat_id = ' . (int) $cat_id,
+			'WHERE'		=> 'b.cat_id = ' . (int) $cat_id . ' AND b.cat_id = c.cat_id',
 
 			'ORDER_BY'	=> 'b.post_time DESC',
 		];
@@ -222,7 +223,14 @@ class category
 			// Cut off blog text
 			if ($this->config['ub_cutoff'] != 0)
 			{
-				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... <a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" title="' . $this->user->lang['BLOG_READ_FULL'] . '" alt=""><em>' . $this->user->lang['BLOG_READ_FULL'] . '</em></a>' : $text;
+				if ($this->config['ub_show_desc'] == 1)
+				{
+					$text = (strlen($text) > $this->config['ub_cutoff']) ? $row['blog_description'] . '<span class="blog-read-full"> <br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '">' . $this->user->lang['BLOG_READ_FULL'] . '</a></span>' : $text;
+				}
+				else
+				{
+					$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . '<span class="blog-read-full"> ... <a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '">' . $this->user->lang['BLOG_READ_FULL'] . '</a></span>' : $text;
+				}
 			}
 
 			// Get category name, same for all rows
@@ -252,11 +260,18 @@ class category
 			$this->db->sql_freeresult($result);
 		}
 
+		// Check if user is subscribed to this blog
+		$subscribed = $this->functions->check_subscription('cat', (int) $cat_id);
+
 		$this->template->assign_vars([
 			'CAT_NAME'			=> $cat_name,
 
-			'S_BLOG_CAN_ADD'	=> $this->auth->acl_get('u_blog_make'),
-			'U_BLOG_ADD'		=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
+			'S_BLOG_CAN_ADD'		=> $this->auth->acl_get('u_blog_make'),
+			'S_BLOG_SUBSCRIBED_CAT'	=> $subscribed,
+			'S_IN_BLOG_CAT'			=> true,
+
+			'U_BLOG_ADD'			=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']),
+			'U_BLOG_SUBSCRIBE_CAT'	=> !$subscribed ? $this->helper->route('posey_ultimateblog_blog', ['action' => 'subscribe', 'mode' => 'cat', 'id' => (int) $cat_id]) : $this->helper->route('posey_ultimateblog_blog', ['action' => 'unsubscribe', 'mode' => 'cat', 'id' => (int) $cat_id]),
 		]);
 
 		// Get sidebar

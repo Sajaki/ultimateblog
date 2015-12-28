@@ -3,3 +3,5 @@ parameters:
     posey.ultimateblog.table.ub.blogs: %core.table_prefix%ub_blogs
     posey.ultimateblog.table.ub.rating: %core.table_prefix%ub_rating
     posey.ultimateblog.table.ub.comments: %core.table_prefix%ub_comments
+    posey.ultimateblog.table.ub.watch.cat: %core.table_prefix%ub_watch_cat
+    posey.ultimateblog.table.ub.watch.blog: %core.table_prefix%ub_watch_blog

@@ -73,23 +73,26 @@
 					</div>
 				<!-- ENDIF -->
 				<!-- BEGIN comments -->
+				<div<!-- IF comments.S_REPORTED and MANAGE_REPORTS --> class="reported"<!-- ENDIF -->>
 					<div class="blog-comment-avatar">
 						<a name="c{comments.ID}"></a>
-						{comments.AVATAR}
+						<!-- IF comments.AVATAR -->{comments.AVATAR}<!-- ELSE --><img src="{T_THEME_PATH}/images/no_avatar.gif" width="60px;" height="60px;" alt="" /><!-- ENDIF -->
 					</div>
 					<div class="blog-comment-text">
-						<!-- IF S_COMMENT_CAN_DEL -->
+						<!-- IF S_COMMENT_CAN_DEL or S_COMMENT_CAN_EDIT or S_COMMENT_CAN_REPORT -->
 							<form id="delete_comment" method="post">
 								<ul class="post-buttons">
-									<li><a href="{comments.U_COMMENT_EDIT}" class="button icon-button edit-icon" title="{L_EDIT}"><span>{L_EDIT}</span></a></li>
-									<li><a href="{comments.U_COMMENT_DELETE}" class="button icon-button delete-icon" title="{L_DELETE}"><span>{L_DELETE}</span></a></li>
+									<!-- IF S_COMMENT_CAN_EDIT --><li><a href="{comments.U_COMMENT_EDIT}" class="button icon-button edit-icon" title="{L_BLOG_COMMENT_EDIT}"><span>{L_BLOG_COMMENT_EDIT}</span></a></li><!-- ENDIF -->
+									<!-- IF S_COMMENT_CAN_REPORT --><li><a href="{comments.U_COMMENT_REPORT}" class="button icon-button report-icon" title="{L_BLOG_COMMENT_REPORT}"><span>{L_BLOG_COMMENT_REPORT}</span></a></li><!-- ENDIF -->
+									<!-- IF S_COMMENT_CAN_DELETE --><li><a href="{comments.U_COMMENT_DELETE}" class="button icon-button delete-icon" title="{L_BLOG_COMMENT_DELETE}"><span>{L_BLOG_COMMENT_DELETE}</span></a></li><!-- ENDIF -->
 								</ul>
 								<input type="hidden" name="delete_comment_id" value="{comments.ID}" />
 							</form>
 						<!-- ENDIF -->
 						<div class="blog-comment-author">{L_BLOG_POSTED_BY} {comments.POSTER} {L_BLOG_ON} {comments.POST_TIME}</div>
-						<br>{comments.TEXT}
+						<div class="blog-comment-text">{comments.TEXT}<!-- IF comments.S_REPORTED and MANAGE_REPORTS --><br><br><p class="post-notice reported"><a href="{comments.U_COMMENT_REPORT_DETAILS}">{L_BLOG_COMMENT_REPORT_VIEW}</a></p><!-- ENDIF --></div>
 					</div>
+				</div>
 				<!-- BEGINELSE -->
 					<!-- IF S_ENABLE_COMMENTS --><span class="blog-alarm">{L_BLOG_COMMENTS_NONE}</span><!-- ENDIF -->
 				<!-- END comments -->

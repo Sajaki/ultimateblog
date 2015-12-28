@@ -26,6 +26,8 @@ class functions
 	protected $ub_cats_table;
 	protected $ub_comments_table;
 	protected $ub_rating_table;
+	protected $ub_watch_blog_table;
+	protected $ub_watch_cat_table;
 
 	/**
 	* Constructor
@@ -45,7 +47,9 @@ class functions
 		$ub_blogs_table,
 		$ub_cats_table,
 		$ub_comments_table,
-		$ub_rating_table)
+		$ub_rating_table,
+		$ub_watch_blog_table,
+		$ub_watch_cat_table)
 	{
 		$this->template	= $template;
 		$this->db		= $db;
@@ -60,8 +64,10 @@ class functions
 		$this->php_ext			= $php_ext;
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
-		$this->ub_comments_table = $ub_comments_table;
-		$this->ub_rating_table	= $ub_rating_table;
+		$this->ub_comments_table	= $ub_comments_table;
+		$this->ub_rating_table		= $ub_rating_table;
+		$this->ub_watch_blog_table	= $ub_watch_blog_table;
+		$this->ub_watch_cat_table	= $ub_watch_cat_table;
 	}
 
 	function sidebar()
@@ -163,7 +169,14 @@ class functions
 			// Cut off blog text
 			if ($this->config['ub_cutoff'] != 0)
 			{
-				$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . ' ... <a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '"><em>' . $this->user->lang['BLOG_READ_FULL'] . '</em></a>' : $text;
+				if ($this->config['ub_show_desc'] == 1)
+				{
+					$text = (strlen($text) > $this->config['ub_cutoff']) ? $row['blog_description'] . '<span class="blog-read-full"> <br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '">' . $this->user->lang['BLOG_READ_FULL'] . '</a></span>' : $text;
+				}
+				else
+				{
+					$text = (strlen($text) > $this->config['ub_cutoff']) ? substr($text, 0, $this->config['ub_cutoff']) . '<span class="blog-read-full"> ... <a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]) . '" alt="" title="' . $this->user->lang['BLOG_READ_FULL'] . '">' . $this->user->lang['BLOG_READ_FULL'] . '</a></span>' : $text;
+				}
 			}
 
 			$this->template->assign_block_vars('blogs', [
@@ -267,11 +280,104 @@ class functions
 		}
 	}
 
+	function comment_report($blog_id, $comment_id)
+	{
+		// Check permissions
+		if (!$this->auth->acl_get('u_blog_comment_report'))
+		{
+			trigger_error($this->user->lang['AUTH_COMMENT_REPORT'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '#c' . $comment_id . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+		}
+
+		// Add lang file
+		$this->user->add_lang('mcp');
+
+		// Set up report reasons
+		$sql = 'SELECT *
+				FROM ' . REPORTS_REASONS_TABLE;
+		$result = $this->db->sql_query($sql);
+
+		$report_reasons = '';
+
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$this->template->assign_block_vars('reason', [
+				'ID'			=> $row['reason_id'],
+				'DESCRIPTION'	=> $row['reason_description'],
+				'S_SELECTED'	=> false,
+			]);
+		}
+
+		$this->db->sql_freeresult($result);
+
+		$this->template->assign_vars([
+			'CAPTCHA_TEMPLATE'	=> false,
+			'S_REPORT_POST'		=> true,
+			'S_CAN_NOTIFY'		=> false,
+		]);
+
+		add_form_key('report');
+
+		if ($this->request->is_set_post('submit'))
+		{
+			if (!check_form_key('report'))
+			{
+				// Invalid form key
+				trigger_error($this->user->lang['FORM_INVALID'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog', ['action' => 'add']) . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
+			}
+
+			// Get all comment details
+			$sql = 'SELECT *
+					FROM ' . $this->ub_comments_table . '
+					WHERE comment_id = ' . (int) $comment_id . '
+						AND blog_id = ' . (int) $blog_id;
+			$result = $this->db->sql_query($sql);
+			$comment = $this->db->sql_fetchrow($result);
+			$this->db->sql_freeresult($result);
+
+			// Let's set all variables
+			$data = array(
+				'reason_id'							=> (int) $this->request->variable('reason_id', 1),
+				'post_id'							=> 0,
+				'pm_id'								=> 0,
+				'user_id'							=> (int) $this->user->data['user_id'],
+				'user_notify'						=> 0,
+				'report_closed'						=> 0,
+				'report_time'						=> (int) time(),
+				'report_text'						=> (string) $this->request->variable('report_text', '', true),
+				'reported_post_text'				=> $comment['comment_text'],
+				'reported_post_uid'					=> $comment['bbcode_uid'],
+				'reported_post_bitfield'			=> $comment['bbcode_bitfield'],
+				'reported_post_enable_bbcode'		=> $this->config['allow_bbcode'],
+				'reported_post_enable_smilies'		=> $this->config['allow_smilies'],
+				'reported_post_enable_magic_url'	=> $this->config['allow_post_links'],
+				'blog_comment_id'					=> (int) $comment_id,
+			);
+
+			// Now insert the report
+			$sql = 'INSERT INTO ' . REPORTS_TABLE . ' ' . $this->db->sql_build_array('INSERT', $data);
+			$this->db->sql_query($sql);
+
+			// And set the comment as reported
+			$sql = 'UPDATE ' . $this->ub_comments_table . ' SET comment_reported = 1 WHERE comment_id = ' . (int) $comment_id;
+			$this->db->sql_query($sql);
+
+			// Set return URLs
+			$return_block = $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]);
+			$return_comment = $return_block . '#c' . (int) $comment_id;
+
+			trigger_error($this->user->lang['BLOG_COMMENT_REPORTED'] . '<br><br><a href="' . $return_block . '">' . $this->user->lang['BLOG_BACK'] . '</a><br><br><a href="' . $return_comment . '">' . $this->user->lang['BLOG_BACK_COMMENT'] . '</a>');
+		}
+	}
+
 	function comment_edit($blog_id, $comment_id)
 	{
-		$sql = 'SELECT *
-				FROM ' . $this->ub_comments_table . '
-				WHERE comment_id = ' . (int) $comment_id;
+		// Grab comment details
+		$sql = 'SELECT c.*, b.blog_subject
+				FROM ' . $this->ub_comments_table . ' c
+				LEFT JOIN ' . $this->ub_blogs_table . ' b
+					ON c.blog_id = b.blog_id
+				WHERE c.comment_id = ' . (int) $comment_id . '
+					AND c.blog_id = ' . (int) $blog_id;
 		$result = $this->db->sql_query($sql);
 		$comment = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
@@ -354,20 +460,12 @@ class functions
 				$this->db->sql_query($sql);
 
 				// Add it to the log
-				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_COMMENT_EDITED', time(), (int) $comment_id);
+				$this->log->add('admin', $this->user->data['user_id'], $this->user->ip, 'LOG_COMMENT_EDITED', false, array($comment_id));
 
 				// Send success message
 				trigger_error($this->user->lang['BLOG_COMMENT_EDITED'] . '<br><br><a href="' . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]) . '#c' . (int) $comment_id . '">' . $this->user->lang['BLOG_COMMENT_VIEW'] . ' &raquo;</a>');
 			}
 		}
-
-		// Grab blog subject for Nav links
-		$sql = 'SELECT blog_subject
-				FROM ' . $this->ub_blogs_table . '
-				WHERE blog_id = ' . (int) $blog_id;
-		$result = $this->db->sql_query($sql);
-		$blog_subject = $this->db->sql_fetchfield('blog_subject');
-		$this->db->sql_freeresult($result);
 
 		// Assign breadcrumb template vars
 		$navlinks_array = [
@@ -377,7 +475,7 @@ class functions
 			],
 			[
 				'U_VIEW_FORUM'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog_id]),
-				'FORUM_NAME'		=> $blog_subject,
+				'FORUM_NAME'		=> $comment['blog_subject'],
 			]
 		];
 
@@ -388,5 +486,107 @@ class functions
 				'U_VIEW_FORUM'	=> $name['U_VIEW_FORUM'],
 			]);
 		}
+	}
+
+	function subscribe($mode)
+	{
+		if ($mode == 'blog' || $mode == 'cat')
+		{
+			$id = (int) $this->request->variable('id', 0);
+
+			// Check if not subscribed already
+			$subscribed = $this->check_subscription($mode, $id);
+
+			$table = $mode == 'blog' ? $this->ub_watch_blog_table : $this->ub_watch_cat_table;
+			$column = $mode == 'blog' ? 'blog_id' : 'cat_id';
+
+			// Not subscribed already, so let's subscribe
+			if (!$subscribed)
+			{
+				$sql = 'INSERT INTO ' . $table . ' ' . $this->db->sql_build_array('INSERT', [
+					$column		=> (int) $id,
+					'user_id'	=> (int) $this->user->data['user_id'],
+				]);
+				$this->db->sql_query($sql);
+
+				// Send success message
+				trigger_error($this->user->lang['BLOG_SUBSCRIBED_TO_' . strtoupper($mode)]);
+			}
+			else
+			{
+				// User is already subscribed already, so unable to subscribe again
+				trigger_error($this->user->lang['BLOG_SUBSCRIBED_ALRDY_' . strtoupper($mode)]);
+			}
+		}
+		else if ($mode == 'all')
+		{
+			// Update users_table bool
+			$sql = 'UPDATE ' . USERS_TABLE . '
+					SET ub_watch_all = 1
+					WHERE user_id = ' . (int) $this->user->data['user_id'];
+			$this->db->sql_query($sql);
+
+			trigger_error($this->user->lang['BLOG_SUBSCRIBED_TO_ALL']);
+		}
+	}
+
+	function unsubscribe($mode)
+	{
+		if ($mode == 'blog' || $mode == 'cat')
+		{
+			$id = (int) $this->request->variable('id', 0);
+
+			// Check is subscribed in the first place
+			$subscribed = $this->check_subscription($mode, $id);
+
+			// Set table and column for mode (mode is either 'blog' or 'cat')
+			$table = $mode == 'blog' ? $this->ub_watch_blog_table : $this->ub_watch_cat_table;
+			$column = $mode == 'blog' ? 'blog_id' : 'cat_id';
+
+			if ($subscribed)
+			{
+				$sql = 'DELETE FROM ' . $table . '
+						WHERE ' . $column . ' = ' . (int) $id . '
+							AND user_id = ' . (int) $this->user->data['user_id'];
+				$this->db->sql_query($sql);
+
+				// Send success message
+				trigger_error($this->user->lang['BLOG_UNSUBSCRIBED_TO_' . strtoupper($mode)]);
+			}
+			else
+			{
+				// User is not subscribed, so unable to unsubsribe
+				trigger_error($this->user->lang['BLOG_SUBSCRIBED_NOT_' . strtoupper($mode)]);
+			}
+		}
+		else if ($mode == 'all')
+		{
+			// Update users_table bool
+			$sql = 'UPDATE ' . USERS_TABLE . '
+					SET ub_watch_all = 0
+					WHERE user_id = ' . (int) $this->user->data['user_id'];
+			$this->db->sql_query($sql);
+
+			// Send success message
+			trigger_error($this->user->lang['BLOG_UNSUBSCRIBED_TO_ALL']);
+		}
+	}
+
+	function check_subscription($mode, $id)
+	{
+		// Set table and column for mode (mode is either 'blog' or 'cat')
+		$table = $mode == 'blog' ? $this->ub_watch_blog_table : $this->ub_watch_cat_table;
+		$column = $mode == 'blog' ? 'blog_id' : 'cat_id';
+
+		$sql = 'SELECT COUNT(user_id) as count
+					FROM ' . $table . '
+					WHERE ' . $column . ' = ' . (int) $id . '
+						AND user_id = ' . (int) $this->user->data['user_id'];
+		$result = $this->db->sql_query($sql);
+		$count = (int) $this->db->sql_fetchfield('count');
+		$this->db->sql_freeresult($result);
+
+		// Return a true or false, for subscribed
+		return $count > 0 ? true : false;
 	}
 }

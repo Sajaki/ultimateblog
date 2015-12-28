@@ -1,0 +1,74 @@
+<!-- INCLUDE mcp_header.html -->
+
+<h2><!-- IF S_REPORTS_OPEN -->{L_MCP_BLOG_REPORTS_OPEN}<!-- ELSE -->{L_MCP_BLOG_REPORTS_CLOSED}<!-- ENDIF --></h2>
+
+<form id="mcp" method="post" action="{S_BLOG_REPORTS_ACTION}">
+	<div class="panel">
+		<div class="inner">
+			<p>{L_BLOG_REPORTS_EXPLAIN}</p>
+
+			<!-- IF .reports -->
+				<div class="action-bar top">
+					Pagination
+				</div>
+				<ul class="topiclist missing-column">
+					<li class="header">
+						<dl>
+							<dt><div class="list-inner with-mark">{L_VIEW_DETAILS}</div></dt>
+							<dd class="moderation"><span>{L_BLOG_AND_REPORTER}</span></dd>
+							<dd class="mark">{L_MARK}</dd>
+						</dl>
+					</li>
+				</ul>
+			<!-- ENDIF -->
+
+			<!-- BEGIN reports -->
+				<!-- IF reports.S_FIRST_ROW --><ul class="topiclist cplist missing-column"><!-- ENDIF -->
+					<li class="row bg<!-- IF reports.S_ROW_COUNT is odd -->2<!-- ELSE -->1<!-- ENDIF -->">
+						<dl>
+							<dt>
+								<div class="list-inner with-mark">
+									<a href="{reports.U_DETAILS}" class="topictitle">Re: {reports.BLOG_SUBJECT}</a>
+									<br>
+									<span>{L_BLOG_POSTED_BY} {reports.POSTED_BY} » {reports.POSTED_ON}</span>
+									<div class="responsive-show" style="display: none;">
+										{L_REPORTER}{L_COLON} {reports.REPORTED_BY} « {reports.REPORTED_ON}
+										<br>
+										{L_BLOG}: <a href="{reports.U_BLOG}">{reports.BLOG_SUBJECT}</a>
+									</div>
+								</div>
+							</dt>
+							<dd class="moderation">
+								<span>
+									{reports.REPORTED_BY} « {reports.REPORTED_ON}
+									<br>
+									{L_BLOG}: <a href="{reports.U_BLOG}">{reports.BLOG_SUBJECT}</a>
+								</span>
+							</dd>
+							<dd class="mark">
+								<input type="checkbox" name="blog_report_id_list[]" value="{reports.REPORT_ID}">
+							</dd>
+						</dl>
+					</li>
+				<!-- IF reports.S_LAST_ROW --></ul><!-- ENDIF -->
+			<!-- BEGINELSE -->
+				<p><strong><!-- IF S_REPORTS_OPEN -->{L_BLOG_REPORTS_OPEN_NONE}<!-- ELSE -->{L_BLOG_REPORTS_CLOSED_NONE}<!-- ENDIF --></strong></p>
+			<!-- END reports -->
+
+		</div>
+	</div>
+
+	<!-- IF .reports -->
+		<fieldset class="display-actions">
+			<input class="button2" type="submit" value="{L_DELETE_REPORTS}" name="delete">
+			<!-- IF S_REPORTS_OPEN -->&nbsp;<input class="button1" type="submit" value="{L_CLOSE_REPORTS}" name="close"><!-- ENDIF -->
+			<div>
+				<a href="#" onClick="marklist('mcp', 'blog_report_id_list', true); return false;">{L_MARK_ALL}</a>
+				&nbsp;::&nbsp;
+				<a href="#" onClick="marklist('mcp', 'blog_report_id_list', false); return false;">{L_UNMARK_ALL}</a>
+			</div>
+		</fieldset>
+	<!-- ENDIF -->
+</form>
+
+<!-- INCLUDE mcp_footer.html -->

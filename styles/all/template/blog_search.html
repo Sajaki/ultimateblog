@@ -1,0 +1,86 @@
+<!-- INCLUDE overall_header.html -->
+
+<!-- IF S_BLOG_SEARCH -->
+	<h2 class="solo">{L_BLOG_SEARCH}</h2>
+
+	<div id="tabs">
+		<ul>
+			<li class="tab"><a href="{U_SEARCH}">{L_FORUM}</a></li>
+			<li class="tab activetab"><a href="{U_BLOG_SEARCH}">{L_BLOG}</a></li>
+		</ul>
+	</div>
+
+	<form method="get" action="{U_BLOG_SEARCH_RESULTS}">
+
+	<div class="panel">
+		<div class="inner">
+		<h3>{L_SEARCH_QUERY}</h3>
+
+		<fieldset>
+		<dl>
+			<dt><label for="bs_keywords">{L_SEARCH_KEYWORDS}{L_COLON}</label></dt>
+			<dd><input type="search" class="inputbox" name="bs_keywords" id="bs_keywords" size="40" title="{L_SEARCH_KEYWORDS}" autofocus /></dd>
+		</dl>
+		<dl>
+			<dt><label for="bsauthor">{L_SEARCH_AUTHOR}{L_COLON}</label><br><span>{L_SEARCH_AUTHOR_EXPLAIN}</span></dt>
+			<dd><input type="search" class="inputbox" name="bs_author" id="bs_author" size="40" title="{L_SEARCH_AUTHOR}" /></dd>
+		</dl>
+		</fieldset>
+
+		</div>
+	</div>
+
+	<div class="panel bg2">
+		<div class="inner">
+
+		<h3>{L_SEARCH_OPTIONS}</h3>
+
+		<fieldset>
+		<dl>
+			<dt><label for="bs_categories">{L_BLOG_SEARCH_CATEGORIES}{L_COLON}</label><br /><span>{L_BLOG_SEARCH_CATEGORIES_EXPLAIN}</span></dt>
+			<dd><select name="bs_cats[]" id="bs_categories" multiple="multiple" size="8" title="{L_BLOG_SEARCH_CATEGORIES}">{S_CATEGORIES_OPTIONS}</select></dd>
+		</dl>
+		<dl>
+			<dt><label for="blog_search_in1">{L_SEARCH_WITHIN}{L_COLON}</label></dt>
+			<dd><label for="blog_search_in2"><input type="radio" name="blog_search_in" id="blog_search_in2" value="blog" checked="checked" /> {L_BLOG_SEARCH_BLOGS}</label></dd>
+			<dd><label for="blog_search_in3"><input type="radio" name="blog_search_in" id="blog_search_in3" value="title" /> {L_BLOG_SEARCH_TITLES}</label></dd>
+			<dd><label for="blog_search_in4"><input type="radio" name="blog_search_in" id="blog_search_in4" value="comment" /> {L_BLOG_SEARCH_COMMENTS}</label></dd>
+		</dl>
+
+		<hr class="dashed" />
+
+		<dl>
+			<dt><label for="bs_sortby">{L_RESULT_SORT}{L_COLON}</label></dt>
+			<dd><select name="bs_sortby" id="bs_sortby" title="{L_RESULT_SORT}">
+					<option value="post_time" selected="selected">{L_POST_TIME}</option>
+					<option value="author">{L_AUTHOR}</option>
+					<option value="title">{L_BLOG_SEARCH_TITLE}</option>
+				</select>&nbsp;
+				<label for="bs_sortdir1"><input type="radio" name="bs_sortdir" id="bs_sortdir1" value="ASC" /> {L_SORT_ASCENDING}</label>
+				<label for="bs_sortdir2"><input type="radio" name="bs_sortdir" id="bs_sortdir2" value="DESC" checked="checked" /> {L_SORT_DESCENDING}</label>
+			</dd>
+		</dl>
+		</fieldset>
+
+		</div>
+	</div>
+
+	<div class="panel bg3">
+		<div class="inner">
+
+		<fieldset class="submit-buttons">
+			{S_HIDDEN_FIELDS}<input type="reset" value="{L_RESET}" name="reset" class="button2" />&nbsp;
+			<input type="submit" name="submit" value="{L_SEARCH}" class="button1" />
+		</fieldset>
+
+		</div>
+	</div>
+
+	</form>
+<!-- ENDIF -->
+
+<!-- IF S_BLOG_SEARCH_RESULTS -->
+	<!-- INCLUDE blog_search_results.html -->
+<!-- ENDIF -->
+
+<!-- INCLUDE overall_footer.html -->
