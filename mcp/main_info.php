@@ -25,4 +25,4 @@ class main_info
 			),
 		);
 	}
-} 
+}
