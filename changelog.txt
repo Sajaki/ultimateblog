@@ -18,7 +18,7 @@
 ─────────────█─────▄▄──▄▀─█							# Initial Release
 ─────────────█▄──────────█
 ─────────────█▀█▄▄──▄▄▄▄▄█▄▄▄▄▄
-───────────▄██▄──▀▀▀█─────────█						-=[ v.1.1.0 ]=-
+───────────▄██▄──▀▀▀█─────────█						-=[ v1.1.0 ]=-
 ──────────██▄─█▄────█─────────█
 ───▄▄▄▄███──█▄─█▄───█─────────██▄▄▄					# [CATEGORY] Fixed blog link, missing closing " in href
 ▄█▀▀────█────█──█▄──█▓▓▓▓▓▓▓▓▓█───▀▀▄				# [BLOG ADD] Fixed hard coded language
@@ -43,3 +43,16 @@
 ─█──█▄▀─█─█─█▀────▀▀█──█──█─█─█▄▀─█▄█				# [JS] Moved JavaScript to overall_footer_after
 ─▀──▀─▀─▀▀▀─▀▀────▀▀───▀───▀──▀─▀─▄▄█
 ─────────────────────────────────────
+													-=[ v1.2.1 ]=-
+													# [CATEGORIES] Fixed small language issue in ACP
+													# [PROFILE] Added search user's blog posts/comments
+													# [JQUERY] Removed jQuery inclusion
+
+													-=[ v1.3.0 ]=-
+													# [CODE COMMENTS] Commented everything
+													# [NOTIFICATION] Added e-mail template
+													# [STYLE] Orded all template files
+													# [RSS] Added a RSS Feed
+													# [MCP] Fixed open/closed language
+													# [MCP] Added reports pagination
+													

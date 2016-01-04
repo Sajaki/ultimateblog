@@ -12,26 +12,26 @@ namespace posey\ultimateblog\notification;
 /**
 * Ultimate Blog: Subscribe notification class
 */
-
 class subscribe extends \phpbb\notification\type\base
 {
+	# @var \phpbb\controller\helper
 	protected $helper;
 
 	/**
 	* Notification Type: Subscribe | Constructor
 	*
-	* @param \phpbb\user_loader 					$user_loader
-	* @param \phpbb\db\driver\driver_interface 		$db
-	* @param \phpbb\cache\driver\driver_interface 	$cache
-	* @param \phpbb\user 							$user
-	* @param \phpbb\auth\auth 						$auth
-	* @param \phpbb\config\config 					$config
-	* @param \phpbb\controller\helper 				$helper
-	* @param string 								$phpbb_root_path
-	* @param string 								$php_ext
-	* @param string 								$notification_types_table
-	* @param string 								$notifications_table
-	* @param string 								$user_notifications_table
+	* @param \phpbb\user_loader 				$user_loader				User loader object
+	* @param \phpbb\db\driver\driver_interface	$db							Database object
+	* @param \phpbb\cache\cache					$cache						Cache object
+	* @param \phpbb\user 						$user						User object
+	* @param \phpbb\auth\auth 					$auth						Auth object
+	* @param \phpbb\config\config 				$config						Config object
+	* @param \phpbb\controller\helper 			$helper						Controller helper object
+	* @param string 							$phpbb_root_path			phpBB root path
+	* @param string 							$php_ext					phpEx
+	* @param string 							$notification_types_table	Notification types database table
+	* @param string 							$notifications_table		Notifications database table
+	* @param string 							$user_notifications_table	User notifications database table
 	* @return \phpbb\notification\type\base
 	*/
 
@@ -165,7 +165,14 @@ class subscribe extends \phpbb\notification\type\base
 	*/
 	public function get_email_template()
 	{
-		return false;
+		if ($this->get_data('mode') == 'blog')
+		{
+			return 'newblog_notify';
+		}
+		else if ($this->get_data('mode') == 'comment')
+		{
+			return 'newcomment_notify';
+		}
 	}
 
 	/**
@@ -175,7 +182,31 @@ class subscribe extends \phpbb\notification\type\base
 	*/
 	public function get_email_template_variables()
 	{
-		return [];
+		$username = $this->user_loader->get_username($this->get_data('poster_id'), 'username');
+
+		if ($this->get_data('mode') == 'blog')
+		{
+			return [
+				'AUTHOR_NAME'		=> htmlspecialchars_decode($username),
+				'BLOG_TITLE'		=> htmlspecialchars_decode($this->get_data('blog_title')),
+
+				'U_BLOG'			=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $this->get_data('blog_id')]),
+				'U_BLOG_LATEST'		=> $this->helper->route('posey_ultimateblog_blog'),
+				'U_CATEGORY'		=> $this->helper->route('posey_ultimateblog_blog_category', ['cat_id' => (int) $this->get_data('parent_id')]),
+			];
+		}
+		else if ($this->get_data('mode') == 'comment')
+		{
+			return [
+				'AUTHOR_NAME'		=> htmlspecialchars_decode($username),
+				'BLOG_TITLE'		=> htmlspecialchars_decode($this->get_data('blog_title')),
+
+				'U_BLOG'			=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $this->get_data('blog_id')]),
+				'U_BLOG_LATEST'		=> $this->helper->route('posey_ultimateblog_blog'),
+				'U_COMMENT'			=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $this->get_data('blog_id')]) . "#c{$this->item_id}",
+				'U_STOP_WATCHING_BLOG'	=> $this->helper->route('posey_ultimateblog_blog', ['action' => 'unsubscribe', 'mode' => 'blog', 'id' => (int) $this->get_data('blog_id')]),
+			];
+		}
 	}
 
 	/**

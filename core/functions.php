@@ -11,26 +11,84 @@ namespace posey\ultimateblog\core;
 
 class functions
 {
+	# @var \phpbb\template\template
 	protected $template;
+
+	# @var \phpbb\db\driver\driver_interface
 	protected $db;
+
+	# @var \phpbb\controller\helper
 	protected $helper;
+
+	# @var \phpbb\user
 	protected $user;
+
+	# @var \phpbb\config\config
 	protected $config;
+
+	# @var \phpbb\auth\auth
 	protected $auth;
+
+	# @var \phpbb\log\log
 	protected $log;
+
+	# @var \phpbb\request\request
 	protected $request;
+
+	# @var \phpbb\pagination
 	protected $pagination;
+
+	# @var string phpBB root path
 	protected $phpbb_root_path;
+
+	# @var string phpEx
 	protected $php_ext;
+
+	# The database table the blogs are stored in
+	# @var string
 	protected $ub_blogs_table;
+
+	# The database table the categories are stored in
+	# @var string
 	protected $ub_cats_table;
+
+	# The database table the comments are stored in
+	# @var string
 	protected $ub_comments_table;
+
+	# The database table the ratings are stored in
+	# @var string
 	protected $ub_rating_table;
+
+	# The database table the blog subscriptions are stored in
+	# @var string
 	protected $ub_watch_blog_table;
+
+	# The database table the category subscriptions are stored in
+	# @var string
 	protected $ub_watch_cat_table;
 
 	/**
 	* Constructor
+	*
+	* @param \phpbb\template\template			$template				Template object
+	* @param \phpbb\db\driver\driver_interface	$db						Database object
+	* @param \phpbb\controller\helper			$helper					Controller helper object
+	* @param \phpbb\user						$user					User object
+	* @param \phpbb\config\config				$config					Config object
+	* @param \phpbb\auth\auth					$auth					Auth object
+	* @param \phpbb\log\log						$log					Log object
+	* @param \phpbb\request\request				$request				Request object
+	* @param \phpbb\pagination					$pagination				Pagination object
+	* @param string								$phpbb_root_path		phpBB root path
+	* @param string								$php_ext				phpEx
+	* @param string								$ub_blogs_table			Ultimate Blog blogs table
+	* @param string								$ub_cats_table			Ultimate Blog categories table
+	* @param string								$ub_comments_table		Ultimate Blog comments table
+	* @param string								$ub_rating_table		Ultimate Blog rating table
+	* @param string								$ub_watch_blog_table	Ultimate Blog blog subscription table
+	* @param string								$ub_watch_cat_table		Ultimate Blog category subscription table
+	* @access public
 	*/
 	public function __construct(
 		\phpbb\template\template $template,
@@ -335,7 +393,7 @@ class functions
 			$this->db->sql_freeresult($result);
 
 			// Let's set all variables
-			$data = array(
+			$data = [
 				'reason_id'							=> (int) $this->request->variable('reason_id', 1),
 				'post_id'							=> 0,
 				'pm_id'								=> 0,
@@ -351,7 +409,7 @@ class functions
 				'reported_post_enable_smilies'		=> $this->config['allow_smilies'],
 				'reported_post_enable_magic_url'	=> $this->config['allow_post_links'],
 				'blog_comment_id'					=> (int) $comment_id,
-			);
+			];
 
 			// Now insert the report
 			$sql = 'INSERT INTO ' . REPORTS_TABLE . ' ' . $this->db->sql_build_array('INSERT', $data);
@@ -589,4 +647,131 @@ class functions
 		// Return a true or false, for subscribed
 		return $count > 0 ? true : false;
 	}
+
+	function rss_feed()
+	{
+		if (!$this->config['ub_rss_enabled'])
+		{
+			trigger_error($this->user->lang['BLOG_RSS_FEED_DISABLED']);
+		}
+		else
+		{
+			// Set up standard feed information
+			$feed_vars = [
+				'TITLE'			=> html_entity_decode($this->config['ub_rss_title']),
+				'DESCRIPTION'	=> html_entity_decode($this->config['ub_rss_desc']),
+				'WEBMASTER'		=> $this->config['ub_rss_email'],
+				'EMAIL'			=> $this->config['board_contact'],
+				'CATEGORY'		=> html_entity_decode($this->config['ub_rss_cat']),
+				'COPYRIGHT'		=> html_entity_decode($this->config['ub_rss_copy']),
+				'LANGUAGE'		=> html_entity_decode($this->config['ub_rss_lang']),
+				'LINK'			=> generate_board_url($without_script_path = true) . $this->helper->route('posey_ultimateblog_rss'),
+				'IMAGE'			=> $this->config['ub_rss_img'],
+				'AUTHOR'		=> $this->config['sitename'],
+			];
+
+			// Set up SQL array
+			$sql_ary = [
+				'SELECT'	=> 'b.blog_id, b.blog_subject, b.blog_text, b.post_time, b.bbcode_uid, b.bbcode_bitfield, b.enable_bbcode, b.enable_smilies, b.enable_magic_url, u.username_clean, c.cat_name',
+
+				'FROM'		=> [
+					$this->ub_blogs_table => 'b',
+					$this->ub_cats_table => 'c',
+				],
+
+				'LEFT_JOIN'	=> [
+					[
+						'FROM'	=> [ USERS_TABLE => 'u'],
+						'ON'	=> 'b.poster_id = u.user_id',
+					]
+				],
+
+				'WHERE'		=> 'b.cat_id = c.cat_id',
+
+				'ORDER_BY'	=> 'b.post_time DESC',
+			];
+
+			// Run SQL and get 10 latest blogs
+			$sql = $this->db->sql_build_query('SELECT', $sql_ary);
+			$result = $this->db->sql_query_limit($sql, 10);
+
+			while ($row = $this->db->sql_fetchrow($result))
+			{
+				// Set up blog text for Feed display
+				$flags = (($row['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) +
+						(($row['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) +
+						(($row['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
+
+				$blog_text = generate_text_for_display($row['blog_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $flags);
+				# Set up images source properly for regular images:
+				$blog_text = str_replace('<img src="./', '<img src="' . generate_board_url(), $blog_text);
+				# Censor the text:
+				$blog_text = censor_text($blog_text);
+				# Remove smilies from the text:
+				$blog_text = preg_replace('/<img class="smilies"(.*?) \/>/', '', $blog_text);
+				# Decode HTML characters:
+				$blog_text = htmlentities($blog_text);
+
+				// Assign block vars
+				$item_row = [
+					'link'			=> generate_board_url($without_script_path = true) . $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $row['blog_id']]),
+					'author'		=> html_entity_decode($row['username_clean']),
+					'published'		=> $this->user->format_date($row['post_time'], 'D, d M Y H:i:s O'),
+					'category'		=> html_entity_decode($row['cat_name']),
+					'title'			=> html_entity_decode(censor_text($row['blog_subject'])),
+					'description'	=> $blog_text,
+				];
+
+				$item_vars[] = $item_row;
+			}
+
+			// OUTPUT THE RSS PAGE
+			header("Content-Type: application/atom+xml; charset=UTF-8");
+			if (!empty($this->user->data['is_bot']))
+			{
+				// Let reverse proxies know we detected a bot.
+				header('X-PHPBB-IS-BOT: yes');
+			}
+			echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+			echo '<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="' . $feed_vars['LANGUAGE'] . '">' . "\n";
+			echo '	<link rel="self" type="application/atom+xml" href="' . $feed_vars['LINK'] . '" />' . "\n\n";
+			echo (!empty($feed_vars['TITLE'])) ? '	<title>' . $feed_vars['TITLE'] . '</title>' . "\n" : '';
+			echo (!empty($feed_vars['DESCRIPTION'])) ? '	<description>' . $feed_vars['DESCRIPTION'] . '</description>' . "\n" : '';
+			echo (!empty($feed_vars['LINK'])) ? '	<link href="' . $feed_vars['LINK'] .'" />' . "\n" : '';
+			echo (!empty($feed_vars['WEBMASTER'])) ? '	<webMaster>' . $feed_vars['EMAIL'] . '</webMaster>' . "\n" : '';
+			echo (!empty($feed_vars['CATEGORY'])) ? '	<category>' . $feed_vars['CATEGORY'] . '</category>' . "\n" : '';
+			echo (!empty($feed_vars['COPYRIGHT'])) ? '	<copyright>' . $feed_vars['COPYRIGHT'] . '</copyright>' . "\n" : '';
+			echo '	<author><name><![CDATA[' . $feed_vars['AUTHOR'] . ']]></name></author>' . "\n\n";
+
+			foreach ($item_vars as $row)
+			{
+				echo '	<entry>' . "\n";
+				if (!empty($row['author']))
+				{
+					echo '		<author><name><![CDATA[' . $row['author'] . ']]></name></author>' . "\n";
+				}
+				if (!empty($row['published']))
+				{
+					echo '		<published>' . $row['published'] . '</published>' . "\n";
+				}
+				echo '		<id>' . $row['link'] . '</id>' . "\n";
+				echo '		<link href="' . $row['link'] . '"/>' . "\n";
+				echo '		<title type="html"><![CDATA[' . $row['title'] . ']]></title>' . "\n";
+				if (!empty($row['category']))
+				{
+					echo '		<category term="' . $row['category'] . '" label="' . $row['category'] . '"/>' . "\n";
+				}
+				echo '		<content type="html" xml:base="' . $row['link'] . '"><![CDATA[' . "\n";
+				echo '			' . $row['description'];
+				echo "\n" . '			<hr />' . "\n" . '		]]></content>' . "\n";
+				echo '	</entry>' . "\n";
+			}
+
+			echo '</feed>';
+
+			garbage_collection();
+			exit_handler();
+		}
+	}
 }
+

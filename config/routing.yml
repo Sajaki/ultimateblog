@@ -38,3 +38,7 @@ posey_ultimateblog_search:
 posey_ultimateblog_subscribe:
     path: /blog/subscribe
     defaults: { _controller: posey.ultimateblog.controller:subscribe }
+
+posey_ultimateblog_rss:
+    path: /blog/rss
+    defaults: { _controller: posey.ultimateblog.controller:rss }

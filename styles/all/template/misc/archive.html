@@ -3,11 +3,12 @@
 <!-- IF S_BLOG_CAN_ADD --><a href="{U_BLOG_ADD}" class="button icon-button post-icon blog-add" title="{L_BLOG_ADD}">{L_BLOG_ADD}</a><!-- ENDIF -->
 
 <h1 class="blog-name">{L_BLOG}</h1>
+<h2 class="blog-title">{ARCHIVE_TITLE}</h2>
 
 <div class="action-bar top">
-	<!-- IF .pagination or TOTAL_BLOGS -->
+	<!-- IF .pagination or TOTAL_ARCHIVE_COUNT -->
 	<div class="pagination">
-		{TOTAL_BLOGS}
+		{TOTAL_ARCHIVE_COUNT}
 		<!-- IF .pagination -->
 			<!-- INCLUDE pagination.html -->
 		<!-- ELSE -->
@@ -19,8 +20,7 @@
 
 <div class="panel blog-panel">
 	<div class="inner">
-
-		<!-- INCLUDE blog_sidebar.html -->
+		<!-- INCLUDE /misc/blog_sidebar.html -->
 
 		<!-- BEGIN blogs -->
 			<div class="blog<!-- IF blogs.RATING == '5' --> five-star<!-- ENDIF --><!-- IF not blogs.S_LAST_ROW --> blog-border<!-- ENDIF -->">
@@ -33,6 +33,8 @@
 				</div>
 				<br><br>
 			</div>
+		<!-- BEGINELSE -->
+			<div class="blog-alarm">{L_BLOG_ARCHIVE_NO_BLOGS}</div>
 		<!-- END blogs -->
 	</div>
 </div>

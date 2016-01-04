@@ -11,24 +11,69 @@ namespace posey\ultimateblog\core;
 
 class search
 {
+	# @var \phpbb\template\template
 	protected $template;
+
+	# @var \phpbb\db\driver\driver_interface
 	protected $db;
+
+	# @var \phpbb\controller\helper
 	protected $helper;
+
+	# @var \phpbb\user
 	protected $user;
+
+	# @var \phpbb\config\config
 	protected $config;
+
+	# @var \phpbb\auth\auth
 	protected $auth;
+
+	# @var \phpbb\log\log
 	protected $log;
+
+	# @var \phpbb\request\request
 	protected $request;
+
+	# @var \phpbb\pagination
 	protected $pagination;
+
+	# @var string phpBB root path
 	protected $phpbb_root_path;
+
+	# @var string phpEx
 	protected $php_ext;
+
+	# The database table the blogs are stored in
+	# @var string
 	protected $ub_blogs_table;
+
+	# The database table the categories are stored in
+	# @var string
 	protected $ub_cats_table;
+
+	# The database table the comments are stored in
+	# @var string
 	protected $ub_comments_table;
-	protected $ub_rating_table;
 
 	/**
 	* Constructor
+	*
+	* @param \phpbb\template\template			$template			Template object
+	* @param \phpbb\db\driver\driver_interface	$db					Database object
+	* @param \phpbb\controller\helper			$helper				Controller helper object
+	* @param \phpbb\user						$user				User object
+	* @param \phpbb\config\config				$config				Config object
+	* @param \phpbb\auth\auth					$auth				Auth object
+	* @param \phpbb\log\log						$log				Log object
+	* @param \phpbb\request\request				$request			Request objecct
+	* @param \phpbb\pagination					$pagination			Pagination object
+	* @param string								$phpbb_root_path	phpBB root path
+	* @param string								$php_ext			phpEx
+	* @param string								$ub_blogs_table		Ultimate Blog blogs table
+	* @param string								$ub_cats_table		Ultimate Blog categories table
+	* @param string								$ub_comments_table	Ultimate Blog comments table
+	* @access public
 	*/
 	public function __construct(
 		\phpbb\template\template $template,
@@ -44,8 +89,7 @@ class search
 		$php_ext,
 		$ub_blogs_table,
 		$ub_cats_table,
-		$ub_comments_table,
-		$ub_rating_table)
+		$ub_comments_table)
 	{
 		$this->template	= $template;
 		$this->db		= $db;
@@ -61,7 +105,6 @@ class search
 		$this->ub_blogs_table	= $ub_blogs_table;
 		$this->ub_cats_table	= $ub_cats_table;
 		$this->ub_comments_table = $ub_comments_table;
-		$this->ub_rating_table	= $ub_rating_table;
 	}
 
 	function blog_search()
@@ -344,3 +387,4 @@ class search
 		}
 	}
 }
+

@@ -1,4 +1,4 @@
 <!-- IF BLOG_POSTS -->
-	<dt>{L_BLOG_POSTS}{L_COLON}</dt> <dd>{BLOG_POSTS}</dd>
-	<dt>{L_BLOG_COMMENTS}{L_COLON}</dt> <dd>{BLOG_COMMENTS}</dd>
+	<dt>{L_BLOG_POSTS}{L_COLON}</dt> <dd>{BLOG_POSTS}<!-- IF S_BLOG_POSTS_SEARCH --> | <a href="{U_BLOG_POSTS_SEARCH}">{L_BLOG_SEARCH_USER_POSTS}</a><!-- ENDIF --></dd>
+	<dt>{L_BLOG_COMMENTS}{L_COLON}</dt> <dd>{BLOG_COMMENTS}<!-- IF S_BLOG_COMMENTS_SEARCH --> | <a href="{U_BLOG_COMMENTS_SEARCH}">{L_BLOG_SEARCH_USER_COMMENTS}</a><!-- ENDIF --></dd>
 <!-- ENDIF -->

@@ -2,6 +2,10 @@
 	background-image: url("./images/icon_blog.gif");
 }
 
+.icon-blog-rss {
+	background-image: url("./images/icon_blog_rss.gif");
+}
+
 .blog-name {
 	color: #5484AD;
 	font-size: 3em;

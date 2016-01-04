@@ -54,25 +54,65 @@
 					<label><input type="radio" class="radio" name="ub_enabled" value="0"<!-- IF not UB_ENABLED --> checked="checked" <!-- ENDIF --> /> {L_NO}</label></dd>
 			</dl>
 			<dl>
-				<dt><label for="ub_latest_blogs">{L_ACP_UB_SETTINGS_BLOGS_PER_PAGE}{L_COLON}</label><br />{L_ACP_UB_SETTINGS_BLOGS_PER_PAGE_EXPLAIN}</dt>
+				<dt><label for="ub_latest_blogs">{L_ACP_UB_SETTINGS_BLOGS_PER_PAGE}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_BLOGS_PER_PAGE_EXPLAIN}</dt>
 				<dd><input type="text" id="ub_blogs_per_page" name="ub_blogs_per_age" value="{UB_BLOGS_PER_PAGE}" maxlength="2" size="5" /></dd>
 			</dl>
 			<dl>
-				<dt><label for="ub_cutoff">{L_ACP_UB_SETTINGS_CUTOFF}{L_COLON}</label><br />{L_ACP_UB_SETTINGS_CUTOFF_EXPLAIN}</dt>
+				<dt><label for="ub_cutoff">{L_ACP_UB_SETTINGS_CUTOFF}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_CUTOFF_EXPLAIN}</dt>
 				<dd><input type="text" id="ub_cutoff" name="ub_cutoff" value="{UB_CUTOFF}" maxlength="4" size="5" /></dd>
 			</dl>
 			<dl>
-				<dt><label for="ub_show_desc">{L_ACP_UB_SETTINGS_SHOW_DESC}{L_COLON}</label><br />{L_ACP_UB_SETTINGS_SHOW_DESC_EXPLAIN}</dt>
+				<dt><label for="ub_show_desc">{L_ACP_UB_SETTINGS_SHOW_DESC}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_SHOW_DESC_EXPLAIN}</dt>
 				<dd><label><input type="radio" class="radio" name="ub_show_desc" value="1"<!-- IF UB_SHOW_DESC --> checked="checked" <!-- ENDIF --> /> {L_YES}</label>
 					<label><input type="radio" class="radio" name="ub_show_desc" value="0"<!-- IF not UB_SHOW_DESC --> checked="checked" <!-- ENDIF --> /> {L_NO}</label></dd>
 			</dl>
 		</fieldset>
+
+		<fieldset>
+			<legend>{L_ACP_UB_SETTINGS_RSS_SETTINGS}</legend>
+			<dl>
+				<dt><label>{L_ACP_UB_SETTINGS_RSS_ENABLE}{L_COLON}</label></dt>
+				<dd><label><input type="radio" class="radio" name="ub_rss_enabled" value="1"<!-- IF UB_RSS_ENABLED --> checked="checked" <!-- ENDIF --> /> {L_YES}</label>
+					<label><input type="radio" class="radio" name="ub_rss_enabled" value="0"<!-- IF not UB_RSS_ENABLED --> checked="checked" <!-- ENDIF --> /> {L_NO}</label></dd>
+			</dl>
+			<dl>
+				<dt><label for="ub_rss_title">{L_ACP_UB_SETTINGS_RSS_TITLE}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_RSS_TITLE_EXPLAIN}</dt>
+				<dd><input type="text" id="ub_rss_title" name="ub_rss_title" value="{UB_RSS_TITLE}" size="25" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="ub_rss_desc">{L_ACP_UB_SETTINGS_RSS_DESC}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_RSS_DESC_EXPLAIN}</dt>
+				<dd><input type="text" id="ub_rss_desc" name="ub_rss_desc" value="{UB_RSS_DESC}" size="60" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="ub_rss_cat">{L_ACP_UB_SETTINGS_RSS_CAT}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_RSS_CAT_EXPLAIN}</dt>
+				<dd><input type="text" id="ub_rss_cat" name="ub_rss_cat" value="{UB_RSS_CAT}" size="25" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="ub_rss_copy">{L_ACP_UB_SETTINGS_RSS_COPY}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_RSS_COPY_EXPLAIN}</dt>
+				<dd><input type="text" id="ub_rss_copy" name="ub_rss_copy" value="{UB_RSS_COPY}" size="25" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="ub_rss_lang">{L_ACP_UB_SETTINGS_RSS_LANG}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_RSS_LANG_EXPLAIN}</dt>
+				<dd><input type="text" id="ub_rss_lang" name="ub_rss_lang" value="{UB_RSS_LANG}" size="25" /></dd>
+			</dl>
+			<dl>
+				<dt><label for="ub_rss_img">{L_ACP_UB_SETTINGS_RSS_IMG}{L_COLON}</label><br>{L_ACP_UB_SETTINGS_RSS_IMG_EXPLAIN}</dt>
+				<dd><input type="text" id="ub_rss_img" name="ub_rss_img" value="{UB_RSS_IMG}" size="25" /></dd>
+			</dl>
+			<dl>
+				<dt><label>{L_ACP_UB_SETTINGS_RSS_EMAIL}{L_COLON}</label><br>{UB_SETTINGS_RSS_EMAIL_EXPLAIN}</dt>
+				<dd><label><input type="radio" class="radio" name="ub_rss_email" value="1"<!-- IF UB_RSS_EMAIL --> checked="checked" <!-- ENDIF --> /> {L_YES}</label>
+					<label><input type="radio" class="radio" name="ub_rss_email" value="0"<!-- IF not UB_RSS_EMAIL --> checked="checked" <!-- ENDIF --> /> {L_NO}</label></dd>
+			</dl>
+		</fieldset>
+
 		<fieldset class="submit-buttons">
 			<legend>{L_SUBMIT}</legend>
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />
 			{S_FORM_TOKEN}
 		</fieldset>
 	</form>
+
 <!-- ENDIF -->
 
 <!-- INCLUDE overall_footer.html -->

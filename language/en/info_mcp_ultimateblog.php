@@ -49,6 +49,10 @@ $lang = array_merge($lang, array(
 	'BLOG_REPORT_NOT_BLOG'	=> 'The requested report is not a blog report.',
 	'BLOG_REPORT_NOT_EXIST'	=> 'The requested report does not exist.',
 	'BLOG_REPORTED_BY'		=> 'Reported by',
+	'BLOG_REPORTS_COUNT'	=> array(
+		1	=> '%1$s Blog report',
+		2 	=> '%1$s Blog reports',
+	),
 	'BLOG_REPORTS_EMPTY_ID'	=> 'The requested ID(s) do not exist.',
 	'BLOG_REPORTS_EXPLAIN'	=> 'This is a list of all reported blog comments which are still to be handled.',
 	'BLOG_REPORTS_LATEST'	=> 'Latest 5 Blog Reports',

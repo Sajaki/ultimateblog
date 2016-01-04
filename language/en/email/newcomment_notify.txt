@@ -1,0 +1,19 @@
+Subject: Blog notification - "{BLOG_TITLE}"
+
+Hello {USERNAME},
+
+You are receiving this notification you are watching the blog "{BLOG_TITLE}" at "{SITENAME}". A new comment has been posted<!-- IF AUTHOR_NAME !== '' --> by {AUTHOR_NAME}<!-- ENDIF --> since your last visit. No more notifications will be sent until you visit the blog.
+
+If you want to view the new comments made since your last visit, click the following link:
+{U_COMMENT}
+
+If you want to view the blog, click the following link:
+{U_BLOG}
+
+If you want to view the blog overview, click the following link:
+{U_BLOG_LATEST}
+
+If you no longer wish to watch this blog you can either click the "Unsubscribe blog" link found at the bottom of the blog above, or by clicking the following link:
+{U_STOP_WATCHING_BLOG}
+
+{EMAIL_SIG}

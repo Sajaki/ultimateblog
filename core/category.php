@@ -11,24 +11,73 @@ namespace posey\ultimateblog\core;
 
 class category
 {
+	# @var \phpbb\user
 	protected $user;
+
+	# @var \phpbb\template\template
 	protected $template;
+
+	# @var \phpbb\db\driver\driver_interface
 	protected $db;
+
+	# @var \phpbb\log\log
 	protected $log;
+
+	# @var \phpbb\config\config
 	protected $config;
+
+	# @var \phpbb\auth\auth
 	protected $auth;
+
+	# @var \phpbb\controller\helper
 	protected $helper;
+
+	# @var \phpbb\request\request
 	protected $request;
+
+	# @var \phpbb\pagination
 	protected $pagination;
+
+	# @var string phpBB root path
 	protected $phpbb_root_path;
+
+	# @var string phpEx
 	protected $php_ext;
+
+	# The database table the blogs are stored in
+	# @var string
 	protected $ub_blogs_table;
+
+	# The database table the categories are stored in
+	# @var string
 	protected $ub_cats_table;
+
+	# The database table the ratings are stored in
+	# @var string
 	protected $ub_rating_table;
+
+	# @var \posey\ultimateblog\core\functions
 	protected $functions;
 
 	/**
 	* Constructor
+	*
+	* @param \phpbb\user						$user				User object
+	* @param \phpbb\template\template			$template			Template object
+	* @param \phpbb\db\driver\driver_interface	$db					Database object
+	* @param \phpbb\log\log						$log				Log object
+	* @param \phpbb\config\config				$config				Config object
+	* @param \phpbb\auth\auth					$auth				Auth object
+	* @param \phpbb\controller\helper			$helper				Controller helper object
+	* @param \phpbb\request\request				$request			Request object
+	* @param \phpbb\pagination					$pagination			Pagination object
+	* @param string								$phpbb_root_path	phpBB root path
+	* @param string								$php_ext			phpEx
+	* @param string								$ub_blogs_table		Ultimate Blog blogs table
+	* @param string								$ub_cats_table		Ultimate Blog categories table
+	* @param string								$ub_rating_table	Ultimate Blog rating table
+	* @param \posey\ultimateblog\core\functions	$functions			Ultimate Blog general functions
+	* @access public
 	*/
 	public function __construct(
 		\phpbb\user $user,
@@ -154,12 +203,12 @@ class category
 		// Count categories
 		$total_count = (int) $this->db->get_row_count($this->ub_cats_table);
 
-		//Start pagination
+		// Start pagination
 		$this->pagination->generate_template_pagination($this->helper->route('posey_ultimateblog_categories'), 'pagination', 'start', $total_count, $this->config['posts_per_page'], $start);
 
-		$this->template->assign_vars(array(
+		$this->template->assign_vars([
 			'TOTAL_CATS'		=> $this->user->lang('BLOG_CATS_COUNT', (int) $total_count),
-		));
+		]);
 	}
 
 	function display($cat_id)
@@ -322,3 +371,4 @@ class category
 		page_header($cat_name);
 	}
 }
+

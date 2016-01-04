@@ -16,22 +16,61 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 */
 class listener implements EventSubscriberInterface
 {
+	# @var \phpbb\user
 	protected $user;
+
+	# @var \phpbb\template\template
 	protected $template;
+
+	# @var \phpbb\db\driver\driver_interface
 	protected $db;
+
+	# @var \phpbb\config\config
 	protected $config;
+
+	# @var \phpbb\auth\auth
 	protected $auth;
+
+	# @var \phpbb\controller\helper
 	protected $helper;
+
+	# @var \phpbb\request\request
 	protected $request;
-	protected $path_helper;
+
+	# @var string phpBB root path
 	protected $phpbb_root_path;
+
+	# @var string phpEx
 	protected $php_ext;
+
+	# The database table the blogs are stored in
+	# @var string
 	protected $ub_blogs_table;
+
+	# The database table the categories are stored in
+	# @var string
 	protected $ub_cats_table;
+
+	# The database table the comments are stored in
+	# @var string
 	protected $ub_comments_table;
 
 	/**
 	* Constructor
+	*
+	* @param \phpbb\user						$user				User object
+	* @param \phpbb\template\template			$template			Template object
+	* @param \phpbb\db\driver\driver_interface	$db					Database object
+	* @param \phpbb\config\config				$config				Config object
+	* @param \phpbb\auth\auth					$auth				Auth object
+	* @param \phpbb\controller\helper			$helper				Controller helper object
+	* @param \phpbb\request\request				$request			Request object
+	* @param string								$phpbb_root_path	phpBB root path
+	* @param string								$php_ext			phpEx
+	* @param string								$ub_blogs_table		Ultimate Blog blogs table
+	* @param string								$ub_cats_table		Ultimate Blog categories table
+	* @param string								$ub_comments_table	Ultimate Blog comments table
+	* @access public
 	*/
 	public function __construct(
 		\phpbb\user $user,
@@ -41,7 +80,6 @@ class listener implements EventSubscriberInterface
 		\phpbb\auth\auth $auth,
 		\phpbb\controller\helper $helper,
 		\phpbb\request\request $request,
-		\phpbb\path_helper $path_helper,
 		$phpbb_root_path,
 		$php_ext,
 		$ub_blogs_table,
@@ -55,7 +93,6 @@ class listener implements EventSubscriberInterface
 		$this->auth		= $auth;
 		$this->helper	= $helper;
 		$this->request	= $request;
-		$this->path_helper		= $path_helper;
 		$this->phpbb_root_path	= $phpbb_root_path;
 		$this->php_ext			= $php_ext;
 		$this->ub_blogs_table	= $ub_blogs_table;
@@ -63,6 +100,13 @@ class listener implements EventSubscriberInterface
 		$this->ub_comments_table = $ub_comments_table;
 	}
 
+	/**
+	* Assign functions defined in this class to event listeners in the core
+	*
+	* @return array
+	* @static
+	* @access public
+	*/
 	static public function getSubscribedEvents()
 	{
 		return [
@@ -72,12 +116,18 @@ class listener implements EventSubscriberInterface
 			'core.modify_mcp_modules_display_option'	=> 'mcp_modules_display',
 			'core.mcp_front_reports_count_query_before'	=> 'latest_blog_reports',
 			'core.viewonline_overwrite_location'		=> 'viewonline_page',
+
+			// ACP Event
 			'core.permissions'							=> 'permissions',
 		];
 	}
 
-	/*
+	/**
 	* Add Ultimate Blog language
+	*
+	* @param object		$event		Event object
+	* @return null
+	* @access public
 	*/
 	public function set_blog_lang($event)
 	{
@@ -90,17 +140,22 @@ class listener implements EventSubscriberInterface
 	}
 
 	/*
-	* Add overall_header link to the blog page
+	* Add overall_header link for the blog page
+	*
+	* @return null
+	* @access public
 	*/
-	public function add_page_header_link($event)
+	public function add_page_header_link()
 	{
 		if (!empty($this->config['ub_enabled']))
 		{
 			$this->template->assign_vars([
-				'S_BLOG_ENABLED'	=> true,
-				'S_BLOG_VIEW'		=> $this->auth->acl_get('u_blog_view'),
+				'S_BLOG_ENABLED'		=> $this->config['ub_enabled'],
+				'S_BLOG_VIEW'			=> $this->auth->acl_get('u_blog_view'),
+				'S_BLOG_RSS_ENABLED'	=> $this->config['ub_rss_enabled'],
 
 				'U_BLOG'			=> $this->helper->route('posey_ultimateblog_blog'),
+				'U_BLOG_RSS'		=> $this->helper->route('posey_ultimateblog_rss'),
 				'U_BLOG_SEARCH'		=> $this->helper->route('posey_ultimateblog_search'),
 			]);
 		}
@@ -108,6 +163,10 @@ class listener implements EventSubscriberInterface
 
 	/*
 	* Add total blog posts and blog comments to the profile
+	*
+	* @param object		$event		Event object
+	* @return null
+	* @access public
 	*/
 	public function viewprofile($event)
 	{
@@ -133,11 +192,27 @@ class listener implements EventSubscriberInterface
 		$this->template->assign_vars([
 			'BLOG_POSTS'	=> $total_blog_count > 0 ? $total_blog_count : '-',
 			'BLOG_COMMENTS' => $total_comment_count > 0 ? $total_comment_count : '-',
+
+			'S_BLOG_POSTS_SEARCH'		=> $total_blog_count > 0 ? true : false,
+			'S_BLOG_COMMENTS_SEARCH'	=> $total_comment_count > 0 ? true : false,
+
+			'U_BLOG_POSTS_SEARCH'		=> $this->helper->route('posey_ultimateblog_search', ['bs_keyswords' => '', 'bs_author' => $event['member']['username_clean'], 'blog_search_in' => 'blog', 'bs_sortby' => 'post_time', 'bs_sortdir' => 'DESC', 'submit' => 'Search']),
+			'U_BLOG_COMMENTS_SEARCH'	=> $this->helper->route('posey_ultimateblog_search', ['bs_keyswords' => '', 'bs_author' => $event['member']['username_clean'], 'blog_search_in' => 'comment', 'bs_sortby' => 'post_time', 'bs_sortdir' => 'DESC', 'submit' => 'Search']),
+
 		]);
 	}
 
 	/*
-	* Fix display for MCP Modules
+	* Fix display for Ultimate Blog's MCP Modules
+	*
+	* Modules added:
+	* - Blog reports open		'open'
+	* - Blog reports closed		'closed'
+	* - Blog reports details	'details'
+	*
+	* @param object		$event		Event object
+	* @return null
+	* @access public
 	*/
 	public function mcp_modules_display($event)
 	{
@@ -157,9 +232,12 @@ class listener implements EventSubscriberInterface
 	}
 
 	/*
-	* Display latest 5 blogs in MCP Front page
+	* Display latest 5 blog reports in MCP Front page
+	*
+	* @return null
+	* @access public
 	*/
-	public function latest_blog_reports($event)
+	public function latest_blog_reports()
 	{
 		if ($this->auth->acl_get('m_blog_reports') && $this->config['ub_enabled'] == 1)
 		{
@@ -230,8 +308,12 @@ class listener implements EventSubscriberInterface
 		}
 	}
 
-	/*
-	* Show who is where in viewonline page
+	/**
+	* Show users as viewing Ultimate Blogs on Who Is Online page
+	*
+	* @param object		$event		Event object
+	* @return null
+	* @access public
 	*/
 	public function viewonline_page($event)
 	{
@@ -399,3 +481,4 @@ class listener implements EventSubscriberInterface
 		$event['categories'] = array_merge($event['categories'], $categories);
 	}
 }
+

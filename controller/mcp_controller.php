@@ -9,25 +9,74 @@
 
 namespace posey\ultimateblog\controller;
 
+/**
+* MCP controller
+*/
 class mcp_controller
 {
+	# @var \phpbb\user
 	protected $user;
+
+	# @var \phpbb\template\template
 	protected $template;
+
+	# @var \phpbb\db\driver\driver_interface
 	protected $db;
+
+	# @var \phpbb\log\log
 	protected $log;
+
+	# @var \phpbb\config\config
 	protected $config;
+
+	# @var \phpbb\auth\auth
 	protected $auth;
+
+	# @var \phpbb\controller\helper
 	protected $helper;
+
+	# @var \phpbb\request\request
 	protected $request;
+
+	# @var \phpbb\pagination
 	protected $pagination;
+
+	# @var string phpBB root path
 	protected $phpbb_root_path;
+
+	# @var string phpEx
 	protected $php_ext;
+
+	# The database table the blogs are stored in
+	# @var string
 	protected $ub_blogs_table;
+
+	# The database table the categories are stored in
+	# @var string
 	protected $ub_cats_table;
+
+	# The database table the comments are stored in
+	# @var string
 	protected $ub_comments_table;
 
 	/**
 	* Constructor
+	*
+	* @param \phpbb\user						$user				User object
+	* @param \phpbb\template\template			$template			Template object
+	* @param \phpbb\db\driver\driver_interface	$db					Database object
+	* @param \phpbb\log\log						$log				Log object
+	* @param \phpbb\config\config				$config				Config object
+	* @param \phpbb\auth\auth					$auth				Auth object
+	* @param \phpbb\controller\helper			$helper				Controller helper object
+	* @param \phpbb\request\request				$request			Request object
+	* @param \phpbb\pagination					$pagination			Pagination object
+	* @param string								$phpbb_root_path	phpBB root path
+	* @param string								$php_ext			phpEx
+	* @param string								$ub_blogs_table		Ultimate Blog blogs table
+	* @param string								$ub_cats_table		Ultimate Blog categories table
+	* @param string								$ub_comments_table	Ultimate Blog comments table
+	* @access public
 	*/
 	public function __construct(
 		\phpbb\user $user,
@@ -61,6 +110,9 @@ class mcp_controller
 		$this->ub_comments_table	= $ub_comments_table;
 	}
 
+	/**
+	* Ultimate Blog | MCP | Reports: Open
+	*/
 	public function reports_open()
 	{
 		// When blog is disabled, redirect users back to the forum index
@@ -69,11 +121,14 @@ class mcp_controller
 			redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}"));
 		}
 
-		// Check permissions
+		// Check if user has the permission to manage blog reports
 		if (!$this->auth->acl_get('m_blog_reports'))
 		{
-			redirect(append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}"));
+			trigger_error($this->user->lang['AUTH_MANAGE_BLOG_REPORTS'] . '<br><br><a href="' . append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}") . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
 		}
+
+		// Request start variable
+		$start = $this->request->variable('start', 0);
 
 		// Get all open blog comment reports
 		$sql = 'SELECT r.*, u.user_id, u.username, u.user_colour
@@ -83,7 +138,7 @@ class mcp_controller
 				WHERE r.blog_comment_id <> 0
 					AND r.report_closed = 0
 				ORDER BY r.report_time DESC';
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['topics_per_page'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -114,42 +169,70 @@ class mcp_controller
 			// Set report ID
 			$report_id = (int) $row['report_id'];
 
+			// Set output vars for display in the template
 			$this->template->assign_block_vars('reports', [
 				'REPORT_ID'		=> $report_id,
 				'BLOG_SUBJECT'	=> $blog['blog_subject'],
 				'POSTED_BY'		=> get_username_string('full', $blog['user_id'], $blog['username'], $blog['user_colour']),
-				'POSTED_ON'		=> $this->user->format_date($blog['post_time']),
+				'POSTED_ON'		=> $blog['post_time'] ? $this->user->format_date($blog['post_time']) : '',
 				'REPORTED_BY'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
-				'REPORTED_ON'	=> $this->user->format_date($row['report_time']),
+				'REPORTED_ON'	=> $row['report_time'] ? $this->user->format_date($row['report_time']) : '',
 
+				'S_REPORTS_OPEN'		=> true,
 				'S_BLOG_REPORTS_ACTION' => append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=open"),
 
 				'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog['blog_id']]),
 				'U_COMMENT'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog['blog_id']]) . '#c' . (int) $row['blog_comment_id'],
 				'U_DETAILS'		=> append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=details&amp;id=$report_id"),
 			]);
-
-			$this->template->assign_var('S_REPORTS_OPEN', true);
 		}
 
-		// Add lang file
+		// Define in the template that we are in the "open" reports module
+		$this->template->assign_var('S_BLOG_REPORTS_OPEN', true);
+
+		// Count reports
+		$sql = 'SELECT COUNT(report_id) as total_count
+				FROM ' . REPORTS_TABLE . '
+				WHERE blog_comment_id <> 0
+					AND report_closed = 0';
+		$result = $this->db->sql_query($sql);
+		$total_count = (int) $this->db->sql_fetchfield('total_count');
+		$this->db->sql_freeresult($result);
+
+		// Start pagination
+		$this->pagination->generate_template_pagination(append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=open"), 'pagination', 'start', $total_count, $this->config['topics_per_page'], $start);
+
+		$this->template->assign_vars([
+			'TOTAL_REPORTS'		=> $this->user->lang('BLOG_REPORTS_COUNT', (int) $total_count),
+		]);
+
+		// Add phpBB's MCP language file
 		$this->user->add_lang('mcp');
 
-		// If we want to delete reports
+		// Is the "delete" form submitted to us?
 		if ($this->request->is_set_post('delete'))
 		{
+			// Request an array with all marked report ids
 			$ids = $this->request->variable('blog_report_id_list', array(0));
+
+			// Send it to the handle reports function, with the "delete" action
 			$this->handle_reports('delete', $ids);
 		}
 
-		// If we want to close reports
+		// Is the "close" form submitted to us?
 		if ($this->request->is_set_post('close'))
 		{
+			// Request an array with all marked report ids
 			$ids = $this->request->variable('blog_report_id_list', array(0));
+
+			// Send it to the handle reports function, with the "close" action
 			$this->handle_reports('close', $ids);
 		}
 	}
 
+	/**
+	* Ultimate Blog | MCP | Reports: Closed
+	*/
 	public function reports_closed()
 	{
 		// When blog is disabled, redirect users back to the forum index
@@ -158,11 +241,14 @@ class mcp_controller
 			redirect(append_sid("{$this->phpbb_root_path}index.{$this->php_ext}"));
 		}
 
-		// Check permissions
+		// Check if the user has the permission to manage blog reports
 		if (!$this->auth->acl_get('m_blog_reports'))
 		{
-			redirect(append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}"));
+			trigger_error($this->user->lang['AUTH_MANAGE_BLOG_REPORTS'] . '<br><br><a href="' . append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}") . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
 		}
+
+		// Request start variable
+		$start = $this->request->variable('start', 0);
 
 		// Get all closed blog comment reports
 		$sql = 'SELECT r.*, u.user_id, u.username, u.user_colour
@@ -172,7 +258,7 @@ class mcp_controller
 				WHERE r.blog_comment_id <> 0
 					AND r.report_closed = 1
 				ORDER BY r.report_time DESC';
-		$result = $this->db->sql_query($sql);
+		$result = $this->db->sql_query_limit($sql, $this->config['topics_per_page'], $start);
 
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -203,13 +289,14 @@ class mcp_controller
 			// Set report ID
 			$report_id = (int) $row['report_id'];
 
+			// Set output vars for display in the template
 			$this->template->assign_block_vars('reports', [
 				'REPORT_ID'		=> $report_id,
 				'BLOG_SUBJECT'	=> $blog['blog_subject'],
 				'POSTED_BY'		=> get_username_string('full', $blog['user_id'], $blog['username'], $blog['user_colour']),
-				'POSTED_ON'		=> $this->user->format_date($blog['post_time']),
+				'POSTED_ON'		=> $blog['post_time'] ? $this->user->format_date($blog['post_time']) : '',
 				'REPORTED_BY'	=> get_username_string('full', $row['user_id'], $row['username'], $row['user_colour']),
-				'REPORTED_ON'	=> $this->user->format_date($row['report_time']),
+				'REPORTED_ON'	=> $row['report_time'] ? $this->user->format_date($row['report_time']) : '',
 
 				'S_BLOG_REPORTS_ACTION'	=> append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=closed"),
 
@@ -217,21 +304,44 @@ class mcp_controller
 				'U_COMMENT'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog['blog_id']]) . '#c' . (int) $row['blog_comment_id'],
 				'U_DETAILS'		=> append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=details&amp;id=$report_id"),
 			]);
-
-			$this->template->assign_var('S_REPORTS_CLOSED', true);
 		}
 
-		// Add lang file
+		// Define in the template that we are in the "closed" reports module
+		$this->template->assign_var('S_REPORTS_CLOSED', true);
+
+		// Count reports
+		$sql = 'SELECT COUNT(report_id) as total_count
+				FROM ' . REPORTS_TABLE . '
+				WHERE blog_comment_id <> 0
+					AND report_closed = 1';
+		$result = $this->db->sql_query($sql);
+		$total_count = (int) $this->db->sql_fetchfield('total_count');
+		$this->db->sql_freeresult($result);
+
+		// Start pagination
+		$this->pagination->generate_template_pagination(append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=closed"), 'pagination', 'start', $total_count, $this->config['topics_per_page'], $start);
+
+		$this->template->assign_vars([
+			'TOTAL_REPORTS'		=> $this->user->lang('BLOG_REPORTS_COUNT', (int) $total_count),
+		]);
+
+		// Add phpBB's MCP language file
 		$this->user->add_lang('mcp');
 
-		// If we want to delete reports
+		// Is the "delete" form submitted to us?
 		if ($this->request->is_set_post('delete'))
 		{
+			// Request an array with all marked report ids
 			$ids = $this->request->variable('blog_report_id_list', array(0));
+
+			// Send it to the handle reports function, with the "delete" action
 			$this->handle_reports('delete', $ids);
 		}
 	}
 
+	/**
+	* Ultimate Blog | MCP | Reports: Details
+	*/
 	public function reports_details()
 	{
 		// When blog is disabled, redirect users back to the MCP Front page
@@ -240,7 +350,7 @@ class mcp_controller
 			redirect(append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}"));
 		}
 
-		// Check permissions
+		// Check if user has the permission to manage blog reports
 		if (!$this->auth->acl_get('m_blog_reports'))
 		{
 			trigger_error($this->user->lang['AUTH_MANAGE_BLOG_REPORTS'] . '<br><br><a href="' . append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}") . '">&laquo; ' . $this->user->lang['BACK_TO_PREV'] . '</a>');
@@ -313,6 +423,7 @@ class mcp_controller
 							(($report['reported_post_enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
 		$comment_text = generate_text_for_display($report['reported_post_text'], $report['reported_post_uid'], $report['reported_post_bitfield'], $bbcode_options);
 
+		// Set output vars for display in the template
 		$this->template->assign_vars([
 			'REPORT_ID'		=> $report_id,
 			'REPORT_REASON'	=> $report['reason_title'],
@@ -326,35 +437,41 @@ class mcp_controller
 			'COMMENT_POSTED_ON'	=> $this->user->format_date($blog['post_time']),
 
 			'S_BLOG_REPORT_DETAILS_ACTION'	=> append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=details&amp;id=$report_id"),
-			'S_REPORT_OPEN'	=> $report['report_closed'] == 0 ? true : false,
+			'S_REPORT_OPEN'					=> $report['report_closed'] == 0 ? true : false,
 
 			'U_BLOG'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog['blog_id']]),
 			'U_COMMENT'		=> $this->helper->route('posey_ultimateblog_blog_display', ['blog_id' => (int) $blog['blog_id']]) . '#c' . (int) $report['blog_comment_id'],
 			'U_REPORTS'		=> append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=open"),
 		]);
 
-		// Add lang file
+		// Add phpBB's MCP language file
 		$this->user->add_lang('mcp');
 
-		// If we want to delete this report
+		// Is the "delete" from submitted to us?
 		if ($this->request->is_set_post('delete'))
 		{
+			// Request the blog report id, array for consistency.
 			$ids = $this->request->variable('blog_report_id_list', array(0));
+
+			// Send it to the handle reports function, with "delete" action
 			$this->handle_reports('delete', $ids);
 		}
 
-		// If we want to close this report
+		// Is the "close" form submitted to us?
 		if ($this->request->is_set_post('close'))
 		{
+			// Request the blog report id, array for consistency.
 			$ids = $this->request->variable('blog_report_id_list', array(0));
+
+			// Send it to the handle reports function, with "close" action
 			$this->handle_reports('close', $ids);
 		}
 	}
 
-	/*
-	* Handle blog reports
-	* $action	string		'close' or 'delete'
-	* $ids		array		report ids
+	/**
+	* Ultimate Blog | MCP | Reports: Handle reports
+	* $action	string		"close" or "delete"
+	* $ids		array		blog report ids
 	*/
 	function handle_reports($action, $ids)
 	{
@@ -383,6 +500,7 @@ class mcp_controller
 		$this->db->sql_freeresult($result);
 
 		// Update the blog comments, mark as unreported
+		// Regardless of what the action is, the report is done.
 		$sql = 'UPDATE ' . $this->ub_comments_table . '
 				SET comment_reported = 0
 				WHERE ' . $this->db->sql_in_set('comment_id', $comments);
@@ -405,9 +523,10 @@ class mcp_controller
 			$this->db->sql_query($sql);
 		}
 
-		// Add it to the moderators log
+		// Add the "action" for the blog report to the moderators log
 		foreach ($comments as $comment_id)
 		{
+			// Select the blog subject, needed for the log entry
 			$sql = 'SELECT b.blog_subject
 					FROM ' . $this->ub_blogs_table . ' b
 					LEFT JOIN ' . $this->ub_comments_table . ' c
@@ -420,7 +539,9 @@ class mcp_controller
 			$this->log->add('mod', $this->user->data['user_id'], $this->user->ip, 'LOG_BLOG_REPORT_' . strtoupper($action) . 'D', false, array($blog_subject));
 		}
 
-		// Send success message
+		// The blog report has been closed/deleted and it has been logged
+		// Confirm this to the user and provide link back to open blog reports
 		trigger_error($this->user->lang['BLOG_REPORT_' . strtoupper($action) . 'D'] . '<br><br><a href="' . append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=open") . '">&laquo; ' . $this->user->lang['BLOG_REPORTS_RETURN'] . '</a>');
 	}
 }
+

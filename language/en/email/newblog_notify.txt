@@ -1,0 +1,18 @@
+Subject: Blog notification - "{BLOG_TITLE}"
+
+Hello {USERNAME},
+
+You are receiving this notification because you are watching the blogs at "{SITENAME}". A new blog has been posted<!-- IF AUTHOR_NAME !== '' --> by {AUTHOR_NAME}<!-- ENDIF --> since your last visit. The title of the blog is: {BLOG_TITLE}.
+
+If you want to view the blog post made since your last visit, click the following link:
+{U_BLOG}
+
+If you want to view the blog category, click the following link:
+{U_CATEGORY}
+
+If you want to view the blog overview, click the following link:
+{U_BLOG_LATEST}
+
+If you no longer wish to watch this blog you can either click the "Unsubscribe blog category" or the "Unsubscribe blogs" link found at the bottom of the above links, depending on through which you are subscribed.
+
+{EMAIL_SIG}

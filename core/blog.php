@@ -11,28 +11,91 @@ namespace posey\ultimateblog\core;
 
 class blog
 {
+	# @var \phpbb\user
 	protected $user;
+
+	# @var \phpbb\template\template
 	protected $template;
+
+	# @var \phpbb\db\driver\driver_interface
 	protected $db;
+
+	# @var \phpbb\log\log
 	protected $log;
+
+	# @var \phpbb\config\config
 	protected $config;
+
+	# @var \phpbb\auth\auth
 	protected $auth;
+
+	# @var \phpbb\notification\manager
 	protected $notification_manager;
+
+	# @var \phpbb\controller\helper
 	protected $helper;
+
+	# @var \phpbb\request\request
 	protected $request;
+
+	# @var \phpbb\pagination
 	protected $pagination;
+
+	# @var string phpBB root path
 	protected $phpbb_root_path;
+
+	# @var string phpEx
 	protected $php_ext;
+
+	# The database table the blogs are stored in
+	# @var string
 	protected $ub_blogs_table;
+
+	# The database table the categories are stored in
+	# @var string
 	protected $ub_cats_table;
+
+	# The database table the comments are stored in
+	# @var string
 	protected $ub_comments_table;
+
+	# The database table the ratings are stored in
+	# @var string
 	protected $ub_rating_table;
+
+	# The database table the blog subscriptions are stored in
+	# @var string
 	protected $ub_watch_blog_table;
+
+	# The database table the category subscriptions are stored in
+	# @var string
 	protected $ub_watch_cat_table;
+
+	# @var \posey\ultimateblog\core\functions
 	protected $functions;
 
 	/**
 	* Constructor
+	*
+	* @param \phpbb\user						$user					User object
+	* @param \phpbb\template\template			$template				Template object
+	* @param \phpbb\db\driver\driver_interface	$db						Database object
+	* @param \phpbb\log\log						$log					Log object
+	* @param \phpbb\config\config				$config					Config object
+	* @param \phpbb\notification\manager		$notification_manager	Notification Manager
+	* @param \phpbb\controller\helper			$helper					Controller helper object
+	* @param \phpbb\request\request				$request				Request object
+	* @param \phpbb\pagination					$pagination				Pagination object
+	* @param string								$phpbb_root_path		phpBB root path
+	* @param string								$php_ext				phpEx
+	* @param string								$ub_blogs_table			Ultimate Blog blogs table
+	* @param string								$ub_cats_table			Ultimate Blog categories table
+	* @param string								$ub_comments_table		Ultimate Blog comments table
+	* @param string								$ub_rating_table		Ultimate Blog rating table
+	* @param string								$ub_watch_blog_table	Ultimate Blog blog subscriptions table
+	* @param string								$ub_watch_cat_table		Ultimate Blog category subscriptions table
+	* @param \posey\ultimateblog\core\functions	$functions				Ultimate Blog general functions
+	* @access public
 	*/
 	public function __construct(
 		\phpbb\user $user,
@@ -1001,3 +1064,4 @@ class blog
 		return $rating ? $rating : false;
 	}
 }
+
