@@ -481,4 +481,3 @@ class listener implements EventSubscriberInterface
 		$event['categories'] = array_merge($event['categories'], $categories);
 	}
 }
-

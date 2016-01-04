@@ -774,4 +774,3 @@ class functions
 		}
 	}
 }
-

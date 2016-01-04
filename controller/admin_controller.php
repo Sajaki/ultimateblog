@@ -420,11 +420,11 @@ class admin_controller
 				generate_text_for_storage($desc, $uid, $bitfield, $options, $allow_bbcode, $allow_urls, $allow_smilies);
 
 				$cat_row = array(
-					'cat_name'			=> ucfirst(
+					'cat_name'			=> ucfirst($name),
 					'cat_desc'			=> $desc,
 					'bbcode_uid'		=> $uid,
 					'bbcode_bitfield'	=> $bitfield,
-					'enable_bbcode'	 => $allow_bbcode ? 1 : 0,
+					'enable_bbcode'	 	=> $allow_bbcode ? 1 : 0,
 					'enable_smilies'	=> $allow_smilies ? 1 : 0,
 					'enable_magic_url'	=> $allow_urls ? 1 : 0,
 				);

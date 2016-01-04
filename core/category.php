@@ -371,4 +371,3 @@ class category
 		page_header($cat_name);
 	}
 }
-

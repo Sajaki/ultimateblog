@@ -544,4 +544,3 @@ class mcp_controller
 		trigger_error($this->user->lang['BLOG_REPORT_' . strtoupper($action) . 'D'] . '<br><br><a href="' . append_sid("{$this->phpbb_root_path}mcp.{$this->php_ext}?i=-posey-ultimateblog-mcp-main_module&amp;mode=open") . '">&laquo; ' . $this->user->lang['BLOG_REPORTS_RETURN'] . '</a>');
 	}
 }
-
