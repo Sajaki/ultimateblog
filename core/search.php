@@ -260,7 +260,7 @@ class search
 			// Are there any keywords filled in?
 			// If YES: We need to check blog_subject, blog_text and comment_text for possession of the keywords
 			// If NO: We can display all the results, as it's an author search
-			if ($kw[0] != '')
+			if ($kw)
 			{
 				// Set up search count
 				$search_count = 0;
